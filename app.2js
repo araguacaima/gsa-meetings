@@ -1,0 +1,197 @@
+// Dependencies
+const json2md = require("json2md");
+const config = require('./config/settings');
+const calendarIdList = config.calendarId;
+const fs = require('fs');
+const readline = require('readline');
+const google = require('googleapis');
+const googleAuth = require('google-auth-library');
+const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
+const TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
+    process.env.USERPROFILE) + '/.credentials/';
+const TOKEN_PATH = TOKEN_DIR + 'calendar-token.json';
+
+let params = {
+    alwaysIncludeEmail: true,
+    orderBy: 'startTime',
+    showDeleted: false,
+    showHiddenInvitations: true,
+    singleEvents: true,
+    timeMin: '2017-11-27T00:00:00Z',
+    timeMax: '2017-12-01T23:59:59Z',
+    fields: 'items(creator(displayName,email),description,end(date,dateTime),hangoutLink,htmlLink,id,organizer(displayName,email),source,start(date,dateTime),status,summary),summary'
+};
+
+function clean(eventsArray) {
+    let eventsArrayMerged = [];
+    eventsArray.forEach(event => {
+        let found = eventsArrayMerged.find(eventItem => eventItem.summary === event.summary);
+        if (found !== undefined) {
+            let mergedEvent = merge(found, event);
+        } else {
+            eventsArrayMerged.push(event);
+        }
+    });
+    return eventsArrayMerged;
+}
+
+// Load client secrets from a local file.
+fs.readFile('./config/client_secret_standalone.json', function processClientSecrets(err, content) {
+    if (err) {
+        console.log('Error loading client secret file: ' + err);
+        return;
+    }
+    // Authorize a client with the loaded credentials, then call the
+    // Google Calendar API.
+    authorize(JSON.parse(content), getEventsFromAllCalendars);
+});
+
+/**
+ * Create an OAuth2 client with the given credentials, and then execute the
+ * given callback function.
+ *
+ * @param {Object} credentials The authorization client credentials.
+ * @param {function} callback The callback to call with the authorized client.
+ */
+function authorize(credentials, callback) {
+    const clientSecret = credentials.installed.client_secret;
+    const clientId = credentials.installed.client_id;
+    const redirectUrl = credentials.installed.redirect_uris[0];
+    const auth = new googleAuth();
+    const oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
+
+    // Check if we have previously stored a token.
+    fs.readFile(TOKEN_PATH, function(err, token) {
+        if (err) {
+            getNewToken(oauth2Client, callback);
+        } else {
+            oauth2Client.credentials = JSON.parse(token);
+            callback(oauth2Client);
+        }
+    });
+}
+
+/**
+ * Get and store new token after prompting for user authorization, and then
+ * execute the given callback with the authorized OAuth2 client.
+ *
+ * @param {google.auth.OAuth2} oauth2Client The OAuth2 client to get token for.
+ * @param {getEventsCallback} callback The callback to call with the authorized
+ *     client.
+ */
+function getNewToken(oauth2Client, callback) {
+    const authUrl = oauth2Client.generateAuthUrl({
+        access_type: 'offline',
+        scope: SCOPES
+    });
+    console.log('Authorize this app by visiting this url: ', authUrl);
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+    rl.question('Enter the code from that page here: ', function(code) {
+        rl.close();
+
+        oauth2Client.getToken(code, function(err, token) {
+            if (err) {
+                console.log('Error while trying to retrieve access token', err);
+                return;
+            }
+            oauth2Client.credentials = token;
+            storeToken(token);
+            callback(oauth2Client);
+        });
+    });
+}
+
+/**
+ * Store token to disk be used in later program executions.
+ *
+ * @param {Object} token The token to store to disk.
+ */
+function storeToken(token) {
+    try {
+        fs.mkdirSync(TOKEN_DIR);
+    } catch (err) {
+        if (err.code !== 'EEXIST') {
+            throw err;
+        }
+    }
+    fs.writeFile(TOKEN_PATH, JSON.stringify(token));
+    console.log('Token stored to ' + TOKEN_PATH);
+}
+
+function getEventsFromAllCalendars(auth) {
+    calendarIdList.map(function (value) {
+        listEvents(auth, params, value);
+    });
+}
+
+/**
+ * Lists the next 10 events on the user's primary calendar.
+ *
+ * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
+ */
+function listEvents(auth, params_, calendarId) {
+    const calendar = google.calendar('v3');
+    if (params_ === undefined) {
+        params_ = params;
+    }
+    params_.auth = auth;
+    params_.calendarId = calendarId;
+    calendar.events.list(params, function(err, response) {
+        if (err) {
+            console.log('The API returned an error: ' + err);
+            return;
+        }
+        const events = response.items;
+        if (events.length === 0) {
+            console.log('No upcoming events found.');
+        } else {
+            for (let i = 0; i < events.length; i++) {
+                const event = events[i];
+                const start = event.start.dateTime || event.start.date;
+                console.log('%s - %s', start, event.summary);
+            }
+        }
+    });
+}
+
+/*
+console.log(json2md([
+    { h1: "JSON To Markdown" }
+  , { blockquote: "A JSON to Markdown converter." }
+  , { img: [
+        { title: "Some image", source: "https://example.com/some-image.png" }
+      , { title: "Another image", source: "https://example.com/some-image1.png" }
+      , { title: "Yet another image", source: "https://example.com/some-image2.png" }
+      ]
+    }
+  , { h2: "Features" }
+  , { ul: [
+        "Easy to use"
+      , "You can programatically generate Markdown content"
+      , "..."
+      ]
+    }
+  , { h2: "How to contribute" }
+  , { ol: [
+        "Fork the project"
+      , "Create your branch"
+      , "Raise a pull request"
+      ]
+    }
+  , { h2: "Code blocks" }
+  , { p: "Below you can see a code block example." }
+  , { "code": {
+        language: "js"
+      , content: [
+          "function sum (a, b) {"
+        , "   return a + b"
+        , "}"
+        , "sum(1, 2)"
+        ]
+      }
+    }
+]));
+*/
