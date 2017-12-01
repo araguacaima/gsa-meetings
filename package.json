@@ -1,36 +1,25 @@
 {
-  "name": "express_example",
-  "version": "0.0.1",
-  "private": true,
-  "scripts": {
-    "test": "./node_modules/mocha/bin/mocha",
-    "start": "node ./bin/www"
-  },
+  "name": "node-authentication",
+  "main": "server.js",
   "dependencies": {
-    "body-parser": "1.15.1",
-    "cookie-parser": "1.4.3",
-    "debug": "2.2.0",
-    "express": "4.13.4",
-    "google-auth-library": "^0.12.0",
-    "googleapis": "^23.0.0",
-    "jade": "latest",
+    "bcrypt-nodejs": "latest",
+    "body-parser": "~1.15.2",
+    "connect-flash": "~0.1.1",
+    "cookie-parser": "~1.4.3",
+    "ejs": "~2.5.2",
+    "express": "~4.14.0",
+    "express-session": "~1.14.1",
     "json2md": "^1.5.10",
-    "morgan": "1.7.0",
-    "passport-google-oauth": "^1.0.0",
-    "serve-favicon": "2.3.0",
-    "stylus": "0.54.5",
-    "ejs" : "~2.5.2",
-    "mongoose" : "~4.13.1",
-    "passport" : "~0.3.2",
-    "passport-local" : "~1.0.0",
-    "passport-facebook" : "~2.1.1",
-    "passport-twitter" : "~1.0.4",
-    "connect-flash" : "~0.1.1",
-    "bcrypt-nodejs" : "latest",
     "method-override": "~2.3.6",
-    "express-session": "~1.14.1"
-  },
-  "devDependencies": {
-    "mocha": "3.1.0"
+    "mongoose": "~4.13.1",
+    "morgan": "~1.7.0",
+    "passport": "~0.3.2",
+    "passport-facebook": "~2.1.1",
+    "passport-google-oauth2": "^0.1.6",
+    "passport-local": "~1.0.0",
+    "passport-twitter": "~1.0.4",
+    "pug": "^2.0.0-rc.4",
+    "serve-favicon": "^2.4.5",
+    "uuid": "^3.1.0"
   }
 }

@@ -2,19 +2,17 @@
 // var LocalStrategy    = require('passport-local').Strategy;
 // var FacebookStrategy = require('passport-facebook').Strategy;
 // var TwitterStrategy  = require('passport-twitter').Strategy;
-var GoogleStrategy = require('passport-google-oauth2').Strategy;
-var RememberMeStrategy = require('passport-remember-me').Strategy;
-var LocalStrategy = require('passport-local').Strategy;
+const GoogleStrategy = require('passport-google-oauth2').Strategy;
+const LocalStrategy = require('passport-local').Strategy;
 
 // load up the user model
-var User = require('../app/models/user');
+const User = require('../app/models/user');
 
 // load the auth variables
-var configAuth = require('./auth'); // use this one for testing
+const configAuth = require('./auth'); // use this one for testing
 
 module.exports = function (passport) {
 
-    var tokens = {};
     // =========================================================================
     // passport session setup ==================================================
     // =========================================================================
@@ -32,48 +30,6 @@ module.exports = function (passport) {
             done(err, user);
         });
     });
-
-    function consumeRememberMeToken(token, fn) {
-        var uid = tokens[token];
-        // invalidate the single-use token
-        delete tokens[token];
-        return fn(null, uid);
-    }
-
-    function saveRememberMeToken(token, uid, fn) {
-        tokens[token] = uid;
-        return fn();
-    }
-
-    function issueToken(user, done) {
-        var token = utils.randomString(64);
-        saveRememberMeToken(token, user.id, function(err) {
-            if (err) { return done(err); }
-            return done(null, token);
-        });
-    }
-
-
-// Remember Me cookie strategy
-//   This strategy consumes a remember me token, supplying the user the
-//   token was originally issued to.  The token is single-use, so a new
-//   token is then issued to replace it.
-
-    passport.use(new RememberMeStrategy(
-        function(token, done) {
-            consumeRememberMeToken(token, function(err, uid) {
-                if (err) { return done(err); }
-                if (!uid) { return done(null, false); }
-
-                findById(uid, function(err, user) {
-                    if (err) { return done(err); }
-                    if (!user) { return done(null, false); }
-                    return done(null, user);
-                });
-            });
-        },
-        issueToken
-    ));
 
 
     // =========================================================================
@@ -378,8 +334,8 @@ module.exports = function (passport) {
 
                             return done(null, user);
                         } else {
-                            var newUser = new User();
-
+                            const newUser = new User();
+                            newUser.google = {};
                             newUser.google.id = profile.id;
                             newUser.google.token = token;
                             newUser.google.name = profile.displayName;
@@ -396,7 +352,7 @@ module.exports = function (passport) {
 
                 } else {
                     // user already exists and is logged in, we have to link accounts
-                    var user = req.user; // pull the user out of the session
+                    let user = req.user; // pull the user out of the session
 
                     user.google.id = profile.id;
                     user.google.token = token;

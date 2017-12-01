@@ -1,19 +1,27 @@
-# Example Express Application
+# Easy Node Authentication
 
-[![Build Status](https://travis-ci.org/shapeshed/express_example.png?branch=master)](https://travis-ci.org/shapeshed/express_example)
+Code for the entire scotch.io tutorial series: Complete Guide to Node Authentication
 
-This is an example [express][4] application to accompany the article [Creating a basic site with node.js and Express][1]. The site is [hosted on Heroku][6].
+We will be using Passport to authenticate users locally, with Facebook, Twitter, and Google.
 
-The article covers starting an Express 3.x.x app and deploying it to [Heroku][3]
+#### Upgraded To Express 4.0
+This tutorial has been upgraded to use ExpressJS 4.0. See [the commit](https://github.com/scotch-io/easy-node-authentication/commit/020dea057d5a0664caaeb041b18978237528f9a3) for specific changes.
 
-There is a [further article][5] detailing how to continuously deploy Node.js applications using GitHub, Travis & Heroku.
+## Instructions
 
-![Express Example][2]
+If you would like to download the code and try it for yourself:
 
+1. Clone the repo: `git clone git@github.com:scotch-io/easy-node-authentication`
+2. Install packages: `npm install`
+3. Change out the database configuration in config/database.js
+4. Change out auth keys in config/auth.js
+5. Launch: `node server.js`
+6. Visit in your browser at: `http://localhost:8080`
 
-[1]: http://shapeshed.com/creating-a-basic-site-with-node-and-express/
-[2]: http://shapeshed.com/images/articles/express_example.jpg
-[3]: http://heroku.com
-[4]: http://expressjs.com/
-[5]: http://shapeshed.com/continuously-deploy-node-apps-with-github-travis-and-heroku/
-[6]: http://express-tutorial.herokuapp.com/
+## The Tutorials
+
+- [Getting Started and Local Authentication](http://scotch.io/tutorials/easy-node-authentication-setup-and-local)
+- [Facebook](http://scotch.io/tutorials/easy-node-authentication-facebook)
+- [Twitter](http://scotch.io/tutorials/easy-node-authentication-twitter)
+- [Google](http://scotch.io/tutorials/easy-node-authentication-google)
+- [Linking All Accounts Together](http://scotch.io/tutorials/easy-node-authentication-linking-all-accounts-together)
