@@ -6,16 +6,22 @@ html
     link(rel='stylesheet', href='/stylesheets/chunkfive-fontface.css')
   body
     header
-      nav
-        ul
-          li 
-            a(href="/") Home
-          li 
-            a(href="/about") About
-          li 
-            a(href="/contact") Contact
-          li
-            a.btn.btn-danger(href='/unlink/google') Unlink
+      .container
+        .row
+          .col-sm-1
+            .well
+              nav
+                ul
+                  li
+                    img(src='/images/gsa-logo-small.png')
+                  li
+                    a(href="/") Home
+                  li
+                    a(href="/about") About
+                  li
+                    a(href="/contact") Contact
+                  li
+                    a.btn.btn-danger(href='/unlink/google') Logout
     section#wrapper
       block content
       footer 
