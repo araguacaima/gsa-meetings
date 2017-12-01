@@ -8,7 +8,7 @@
 *.swp
 .DS_Store
 .grunt
-#.idea
+.idea
 .lock-wscript
 .monitor
 .node_repl_history
