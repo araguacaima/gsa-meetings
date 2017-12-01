@@ -5,7 +5,15 @@ module.exports = function (router, passport) {
     // show the home page (will also have our login links)
     router.get('/', ensureAuthenticated, function (req, res) {
         res.render('index', {
-            title: 'Home'
+            title: 'GSA Tools'
+        });
+    });
+
+    // show the home page (will also have our login links)
+    router.get('/calendars', isLoggedIn, function (req, res) {
+
+        res.render('calendars', {
+            title: 'GSA | Calendars'
         });
     });
 
@@ -17,7 +25,8 @@ module.exports = function (router, passport) {
     // PROFILE SECTION =========================
     router.get('/profile', isLoggedIn, function (req, res) {
         res.render('profile', {
-            user: req.user
+            user: req.user,
+            title: 'GSA Profile'
         });
     });
 
