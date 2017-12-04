@@ -1,3 +1,5 @@
+const googleAuth = require('../../config/auth').googleAuth;
+
 module.exports = function (router, passport) {
 
 // normal routes ===============================================================
@@ -17,9 +19,19 @@ module.exports = function (router, passport) {
         });
     });
 
+    // show the home page (will also have our login links)
+    router.get('/picker', isLoggedIn, function (req, res) {
+        res.render('picker', {
+            title: 'GSA | Picker',
+            config: googleAuth
+        });
+    });
+
     router.get('/login',
         function (req, res) {
-            res.render('login')
+            res.render('login', {
+                title: 'GSA | Authentication'
+            })
         });
 
     // PROFILE SECTION =========================
@@ -37,13 +49,13 @@ module.exports = function (router, passport) {
     });
 
 
-    router.get('/about', function(req, res){
+    router.get('/about', function (req, res) {
         res.render('about', {
             title: 'About'
         });
     });
 
-    router.get('/contact', function(req, res){
+    router.get('/contact', function (req, res) {
         res.render('contact', {
             title: 'Contact'
         });

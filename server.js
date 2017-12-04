@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const passport = require('passport');
 
 const json2md = require("json2md");
-
+const WEB_PATH = '/web';
 const flash = require('connect-flash');
 
 const morgan = require('morgan');

@@ -1,0 +1,15 @@
+extends layout
+
+block title
+  title= title
+block scripts
+  script(type='text/javascript').
+    let config =!{JSON.stringify(config)}
+  script(type='text/javascript', src='/javascripts/google-drive-picker.js')
+  script(type='text/javascript', src='/javascripts/jquery-3.1.1.min.js')
+block content
+  #result
+  // The Google API Loader script.
+  script(type='text/javascript')
+    include ../public/javascripts/picker.js
+  script(type='text/javascript', src='https://apis.google.com/js/api.js?onload=onApiLoad')
