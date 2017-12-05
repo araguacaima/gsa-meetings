@@ -135,7 +135,7 @@ console.log(json2md([
 
 
 // routes ======================================================================
-require('./web/routes/routes.js')(app, passport, session); // load our routes and pass in our app and fully configured passport
+require('./web/routes/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport
 
 // launch ======================================================================
 app.listen(port);

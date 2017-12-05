@@ -1,12 +1,8 @@
 const auth = require('../../config/auth').googleAuth;
-let calendars = require('../../app/calendars');
-const fs = require('fs');
-let googleAuth = require('google-auth-library');
-const HOME_DIR = require('os').homedir();
-const TOKEN_DIR = HOME_DIR + '/.credentials';
-const TOKEN_PATH = TOKEN_DIR + '/calendar-token.json';
+const calendars = require('../../app/calendars');
+const googleTools = require('../../app/googleTools');
 
-module.exports = function (router, passport, session) {
+module.exports = function (router, passport) {
 
 // normal routes ===============================================================
 
@@ -19,13 +15,8 @@ module.exports = function (router, passport, session) {
 
     // show the home page (will also have our login links)
     router.get('/calendars', isLoggedIn, function (req, res) {
-        // Load client secrets from a local file.
-        fs.readFile(TOKEN_PATH, function (err, token) {
-            if (!err) {
-                calendars.get(JSON.parse(token));
-            } else {
-                calendars.get();
-            }
+        googleTools.getCredentials(function (credentials) {
+            calendars.get(credentials);
         });
         // calendars.get(tokenPath);
         res.render('calendars', {
@@ -250,7 +241,7 @@ module.exports = function (router, passport, session) {
 function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         if (req.cookies.token !== undefined && req.cookies.token !== 'undefined') {
-            store(req, res);
+            googleTools.storeCredentials(req, res);
         }
         return next();
     } else {
@@ -266,45 +257,4 @@ function isLoggedIn(req, res, next) {
     res.redirect('/');
 }
 
-
-function store(req, res) {
-
-    let session = req.session;
-    const code = req.cookies.token;
-
-    const clientSecret = auth.client_secret;
-    const clientId = auth.client_id;
-    const redirectUrl = auth.redirect_uris[1];
-    const auth_ = new googleAuth();
-    const oauth2Client = new auth_.OAuth2(clientId, clientSecret, redirectUrl);
-    res.clearCookie("token");
-    oauth2Client.getToken(code, function (err, tokens) {
-        // Now tokens contains an access_token and an optional refresh_token. Save them.
-        if (!err) {
-            storeTokens(tokens);
-        } else {
-            //getNewToken();
-        }
-    });
-}
-
-
-/**
- * Store token to disk be used in later program executions.
- *
- * @param {Object} tokens The token to store to disk.
- */
-function storeTokens(tokens) {
-    try {
-        fs.mkdirSync(TOKEN_DIR);
-    } catch (err) {
-        if (err.code !== 'EEXIST') {
-            throw err;
-        }
-    }
-    let tokens_ = JSON.stringify(tokens);
-    fs.writeFile(TOKEN_PATH, tokens_);
-    console.log('Token stored to ' + TOKEN_PATH);
-    return tokens_;
-}
 

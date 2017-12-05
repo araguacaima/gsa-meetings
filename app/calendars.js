@@ -1,15 +1,11 @@
 const settings = require('../config/settings');
 const calendarIdList = settings.calendarIds;
-const fs = require('fs');
-const readline = require('readline');
 let google = require('googleapis');
 let googleAuth = require('google-auth-library');
 const auth_ = require('../config/auth').googleAuth;
 const WEB_PATH = '/web';
 const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
-const TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
-    process.env.USERPROFILE) + '/.credentials/';
-const TOKEN_PATH = TOKEN_DIR + '/calendar-token.json';
+const googleTools = require('../app/googleTools');
 const calendar = google.calendar('v3');
 
 let params = {
@@ -97,8 +93,10 @@ function storeToken(token) {
 }
 
 function getEventsFromAllCalendars(auth) {
-    params.access_token = auth.access_token;
-    params.id_token = auth.id_token;
+    const oAuth2Client = googleTools.getOAuth2Client();
+    googleTools.getCredentials(oAuth2Client.setCredentials);
+    params.auth = oAuth2Client;
+
     calendar.calendarList.list(params)
         .then(resp => {
             console.log(resp);
@@ -139,7 +137,6 @@ function listEvents(auth, params_, calendarId) {
         }
     });
 }
-
 
 module.exports = {
     get: function (auth) {
