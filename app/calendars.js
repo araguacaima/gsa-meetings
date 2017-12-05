@@ -1,26 +1,28 @@
 const google = require('googleapis');
 const googleTools = require('../app/googleTools');
-const googleTools = require('../app/googleTools');
 const calendar = google.calendar('v3');
 let calendarParams = require('../config/settings').calendarParams;
 
-function getEventsFromAllCalendars(auth) {
+function getEventsFromAllCalendars(callback) {
+    const calendarIds = [];
     const oAuth2Client = googleTools.getOAuth2Client();
     googleTools.getCredentials(
         function (credentials) {
             oAuth2Client.credentials = credentials;
             calendarParams.auth = oAuth2Client;
-            calendar.calendarList.list(calendarParams, function (calendars, err) {
-                if (!err) {
+            calendar.calendarList.list(calendarParams, function (err, calendars) {
+                if (err) {
                     console.log(err.message);
                 } else {
-                    calendars.forEach(value =>
-                        listEvents(auth, calendarParams, value)
+                    calendars.items.forEach(calendar =>
+                        calendarIds.push(calendar.id)
                     );
+                    callback(calendarIds);
                 }
             });
         }
     );
+    return calendarIds;
 }
 
 /**
@@ -56,13 +58,13 @@ function listEvents(auth, params_, calendarId) {
 }
 
 module.exports = {
-    get: function (auth) {
+    get: function (auth, callback) {
         // Authorize a client with the loaded credentials, then call the
         // Google Calendar API.
-        if (!auth) {
-            googleTools.authorize(getEventsFromAllCalendars);
+        if (auth === undefined) {
+            googleTools.authorize(getEventsFromAllCalendars(callback));
         } else {
-            getEventsFromAllCalendars(auth)
+            getEventsFromAllCalendars(callback)
         }
     }
 };

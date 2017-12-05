@@ -16,11 +16,12 @@ module.exports = function (router, passport) {
     // show the home page (will also have our login links)
     router.get('/calendars', isLoggedIn, function (req, res) {
         googleTools.getCredentials(function (credentials) {
-            calendars.get(credentials);
-        });
-        // calendars.get(tokenPath);
-        res.render('calendars', {
-            title: 'GSA | Calendars'
+            calendars.get(credentials, function(calendarIds ) {
+                res.render('calendars', {
+                    title: 'GSA | Calendars',
+                    calendarIds: calendarIds
+                });
+            });
         });
     });
 
