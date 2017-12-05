@@ -1,5 +1,5 @@
-const developerKey = config.developerKey;
-const clientId = config.clientID;
+const developerKey = config.developer_key;
+const clientId = config.client_id;
 const scope = ['https://www.googleapis.com/auth/drive.readonly'];
 let pickerApiLoaded = false;
 var oauthToken;

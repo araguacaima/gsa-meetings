@@ -15,6 +15,7 @@ const session = require('express-session');
 
 const configDB = require('./config/database');
 const secrets = require('./config/auth').secrets;
+const auth = require('./config/auth').googleAuth;
 const favicon = require('serve-favicon');
 const path = require('path');
 
@@ -22,6 +23,19 @@ const path = require('path');
 mongoose.connect(configDB.url); // connect to our database
 
 require('./config/passport')(passport); // pass passport for configuration
+
+let google = require('googleapis');
+let OAuth2 = google.auth.OAuth2;
+let oauth2Client = new OAuth2(
+    auth.client_id,
+    auth.client_secret,
+    auth.redirect_uris[1]
+);
+
+// set auth as a global default
+google.options({
+    auth: oauth2Client
+});
 
 app.use(morgan('dev')); // log every request to the console
 app.use(cookieParser()); // read cookies (needed for auth)
@@ -42,6 +56,19 @@ app.use(passport.session()); // persistent login sessions
 app.use(flash()); // use connect-flash for flash messages stored in session
 
 app.use(favicon(path.join(__dirname + WEB_PATH, 'public', 'favicon.ico')));
+// set a cookie
+app.use(function (req, res, next) {
+    // check if client sent cookie
+    let cookie = req.cookies.token;
+    if (cookie === undefined || cookie === 'undefined') {
+        res.cookie('token', req.query.code);
+    } else {
+        if (req.query.code !== undefined && cookie !== req.query.code) {
+            res.cookie('token', req.query.code);
+        }
+    }
+    next(); // <-- important!
+});
 app.use(express.static(path.join(__dirname + WEB_PATH, 'public')));
 
 
@@ -55,7 +82,6 @@ app.use(function (err, req, res, next) {
         error: err
     });
 });
-
 
 // production error handler
 // no stacktraces leaked to user
@@ -109,7 +135,7 @@ console.log(json2md([
 
 
 // routes ======================================================================
-require('./web/routes/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport
+require('./web/routes/routes.js')(app, passport, session); // load our routes and pass in our app and fully configured passport
 
 // launch ======================================================================
 app.listen(port);

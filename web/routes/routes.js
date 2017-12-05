@@ -1,6 +1,12 @@
-const googleAuth = require('../../config/auth').googleAuth;
+const auth = require('../../config/auth').googleAuth;
+let calendars = require('../../app/calendars');
+const fs = require('fs');
+let googleAuth = require('google-auth-library');
+const HOME_DIR = require('os').homedir();
+const TOKEN_DIR = HOME_DIR + '/.credentials';
+const TOKEN_PATH = TOKEN_DIR + '/calendar-token.json';
 
-module.exports = function (router, passport) {
+module.exports = function (router, passport, session) {
 
 // normal routes ===============================================================
 
@@ -13,7 +19,15 @@ module.exports = function (router, passport) {
 
     // show the home page (will also have our login links)
     router.get('/calendars', isLoggedIn, function (req, res) {
-
+        // Load client secrets from a local file.
+        fs.readFile(TOKEN_PATH, function (err, token) {
+            if (!err) {
+                calendars.get(JSON.parse(token));
+            } else {
+                calendars.get();
+            }
+        });
+        // calendars.get(tokenPath);
         res.render('calendars', {
             title: 'GSA | Calendars'
         });
@@ -23,7 +37,7 @@ module.exports = function (router, passport) {
     router.get('/picker', isLoggedIn, function (req, res) {
         res.render('picker', {
             title: 'GSA | Picker',
-            config: googleAuth
+            config: auth
         });
     });
 
@@ -123,6 +137,7 @@ module.exports = function (router, passport) {
     router.get('/auth/google', passport.authenticate('google', {scope: ['profile', 'email']}));
 
     // the callback after google has authenticated the user
+
     router.get('/auth/google/callback',
         passport.authenticate('google', {
             successRedirect: '/',
@@ -234,16 +249,62 @@ module.exports = function (router, passport) {
 //   login page.
 function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
+        if (req.cookies.token !== undefined && req.cookies.token !== 'undefined') {
+            store(req, res);
+        }
         return next();
+    } else {
+        res.redirect('/auth/google');
     }
-    res.redirect('/auth/google')
 }
 
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
-    if (req.isAuthenticated())
+    if (req.isAuthenticated()) {
         return next();
-
+    }
     res.redirect('/');
+}
+
+
+function store(req, res) {
+
+    let session = req.session;
+    const code = req.cookies.token;
+
+    const clientSecret = auth.client_secret;
+    const clientId = auth.client_id;
+    const redirectUrl = auth.redirect_uris[1];
+    const auth_ = new googleAuth();
+    const oauth2Client = new auth_.OAuth2(clientId, clientSecret, redirectUrl);
+    res.clearCookie("token");
+    oauth2Client.getToken(code, function (err, tokens) {
+        // Now tokens contains an access_token and an optional refresh_token. Save them.
+        if (!err) {
+            storeTokens(tokens);
+        } else {
+            //getNewToken();
+        }
+    });
+}
+
+
+/**
+ * Store token to disk be used in later program executions.
+ *
+ * @param {Object} tokens The token to store to disk.
+ */
+function storeTokens(tokens) {
+    try {
+        fs.mkdirSync(TOKEN_DIR);
+    } catch (err) {
+        if (err.code !== 'EEXIST') {
+            throw err;
+        }
+    }
+    let tokens_ = JSON.stringify(tokens);
+    fs.writeFile(TOKEN_PATH, tokens_);
+    console.log('Token stored to ' + TOKEN_PATH);
+    return tokens_;
 }
 
