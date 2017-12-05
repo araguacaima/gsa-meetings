@@ -53,19 +53,6 @@ module.exports = function (router, passport) {
         res.redirect('/');
     });
 
-
-    router.get('/about', function (req, res) {
-        res.render('about', {
-            title: 'About'
-        });
-    });
-
-    router.get('/contact', function (req, res) {
-        res.render('contact', {
-            title: 'Contact'
-        });
-    });
-
 // =============================================================================
 // AUTHENTICATE (FIRST LOGIN) ==================================================
 // =============================================================================
@@ -125,7 +112,7 @@ module.exports = function (router, passport) {
     // google ---------------------------------
 
     // send to google to do the authentication
-    router.get('/auth/google', passport.authenticate('google', {scope: ['profile', 'email']}));
+    router.get('/auth/google', passport.authenticate('google', {scope: ['profile', 'email'].concat(auth.scopes)}));
 
     // the callback after google has authenticated the user
 

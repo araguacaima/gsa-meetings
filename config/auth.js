@@ -31,6 +31,10 @@ module.exports = {
         "home": "http://localhost:8080",
         "javascript_origins": [
             "http://localhost:8080"
+        ],
+        "scopes": [
+            'https://www.googleapis.com/auth/calendar.readonly',
+            'https://www.googleapis.com/auth/plus.login'
         ]
     },
     "secrets": {
