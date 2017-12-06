@@ -24,6 +24,8 @@ function storeCredentials(req, res, callback) {
             if (callback !== undefined) {
                 callback(tokens);
             }
+        } else {
+            getNewToken(oAuth2Client);
         }
     });
 }
@@ -41,7 +43,10 @@ function getCredentials(callback, errorCallback) {
                 callback();
             }
         } else {
-            errorCallback();
+            if (err.code === 'ENOENT') {
+            } else {
+                errorCallback();
+            }
         }
     });
 }
@@ -109,7 +114,7 @@ function getNewToken(oauth2Client, callback) {
             console.log('Error while trying to refresh access token', err);
         } else {
             oauth2Client.credentials = tokens;
-            storeToken(tokens);
+            storeTokens(tokens);
             callback(oauth2Client);
         }
     });
@@ -120,7 +125,7 @@ function getNewToken(oauth2Client, callback) {
             return;
         }
         oauth2Client.credentials = token;
-        storeToken(token);
+        storeTokens(token);
         callback(oauth2Client);
     });
 }
