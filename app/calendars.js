@@ -13,8 +13,12 @@ function getEventsFromAllCalendars(req, callback, errCallback) {
             calendar.calendarList.list(calendarParams, function (err, calendars) {
                 if (err) {
                     console.log(err.message);
+                    errCallback(err);
                 } else {
-                    calendars.items.forEach(calendar =>
+                    let calendarsItems = calendars.items.filter(function (item) {
+                        return !/(calendar\.google\.com)/.test(item.id);
+                    });
+                    calendarsItems.forEach(calendar =>
                         calendarIds.push(calendar.id)
                     );
                     callback(calendarIds);

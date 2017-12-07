@@ -49,7 +49,7 @@ module.exports = function (router, passport) {
     });
 
     // LOGOUT ==============================
-    router.get('/logout', function (req, res) {
+    router.get('/logout', needsRefresh, function (req, res) {
         req.logout();
         res.redirect('/');
     });
@@ -113,7 +113,7 @@ module.exports = function (router, passport) {
     // google ---------------------------------
 
     // send to google to do the authentication
-    router.get('/auth/google',
+    router.get('/auth/google', needsRefresh,
         passport.authenticate('google', {
                 scope: ['profile', 'email'].concat(auth.scopes),
                 access_type: "offline"
@@ -215,7 +215,7 @@ module.exports = function (router, passport) {
 //    });
 
     // google ---------------------------------
-    router.get('/unlink/google', isLoggedIn, function (req, res) {
+    router.get('/unlink/google', isLoggedIn, needsRefresh, function (req, res) {
         res.redirect('/login');
     });
 
@@ -256,4 +256,21 @@ function isLoggedIn(req, res, next) {
     res.redirect('/');
 }
 
+// Simple route middleware to ensure user is authenticated.
+//   Use this route middleware on any resource that needs to be protected.  If
+//   the request is authenticated (typically via a persistent login session),
+//   the request will proceed.  Otherwise, the user will be redirected to the
+//   login page.
+function needsRefresh(req, res, next) {
+    if (req.cookies.google_auth_renew_token) {
+        let user = req.user;
+        if (user) {
+            user.google.token = undefined;
+            user.save(function (err) {
+                next();
+            });
+        }
+    }
+    next();
+}
 
