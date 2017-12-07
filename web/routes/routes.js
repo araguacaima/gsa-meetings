@@ -1,6 +1,5 @@
 const auth = require('../../config/auth').googleAuth;
 const calendars = require('../../app/calendars');
-const googleTools = require('../../app/googleTools');
 
 module.exports = function (router, passport) {
 
@@ -15,13 +14,14 @@ module.exports = function (router, passport) {
 
     // show the home page (will also have our login links)
     router.get('/calendars', isLoggedIn, function (req, res) {
-        googleTools.getCredentials(function (credentials) {
-            calendars.get(credentials, function (calendarIds) {
-                res.render('calendars', {
-                    title: 'GSA | Calendars',
-                    calendarIds: calendarIds
-                });
+        calendars.get(req, function (calendarIds) {
+            res.render('calendars', {
+                title: 'GSA | Calendars',
+                calendarIds: calendarIds
             });
+        }, function (err) {
+            console.log(err);
+            res.redirect('/unlink/google');
         });
     });
 
@@ -216,13 +216,12 @@ module.exports = function (router, passport) {
 
     // google ---------------------------------
     router.get('/unlink/google', isLoggedIn, function (req, res) {
-        resetUser(req, function () {
-            res.redirect('/login');
-        });
+        res.redirect('/login');
     });
 
 };
 
+/*
 function resetUser(req, callback) {
     const user = req.user;
     user.google.token = undefined;
@@ -234,6 +233,7 @@ function resetUser(req, callback) {
         }
     });
 }
+*/
 
 // Simple route middleware to ensure user is authenticated.
 //   Use this route middleware on any resource that needs to be protected.  If
@@ -242,10 +242,6 @@ function resetUser(req, callback) {
 //   login page.
 function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
-        if (req.cookies.token !== undefined && req.cookies.token !== 'undefined') {
-            resetUser(req);
-            googleTools.storeCredentials(req, res);
-        }
         return next();
     } else {
         res.redirect('/auth/google');

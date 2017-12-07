@@ -14,10 +14,9 @@ function getOAuth2Client() {
     return new auth_.OAuth2(clientId, clientSecret, redirectUrl);
 }
 
-function storeCredentials(req, res, callback, errCallBack) {
-    const code = req.cookies.token;
-    const oAuth2Client = this.getOAuth2Client();
-    res.clearCookie("token");
+function requestForCredentials(req, callback, errCallBack) {
+    const oAuth2Client = getOAuth2Client();
+    const code = req.cookies.google_auth_code;
     oAuth2Client.getToken(code, function (err, tokens) {
         if (!err) {
             storeTokens(tokens);
@@ -25,12 +24,23 @@ function storeCredentials(req, res, callback, errCallBack) {
                 callback(tokens);
             }
         } else {
-            errCallBack();
+            if (err.message === 'invalid_grant') {
+                req.res.cookie("google_auth_renew_token", true);
+            }
+            errCallBack(err.message);
         }
     });
 }
 
-function getCredentials(callback, errorCallback) {
+function deleteCredentials() {
+    try {
+        fs.unlinkSync(TOKEN_PATH);
+    } catch (err) {
+        console.log(err.message)
+    }
+}
+
+function getCredentials(req, callback, errCallback) {
     fs.readFile(TOKEN_PATH, function (err, credentials) {
         if (!err) {
             try {
@@ -44,8 +54,9 @@ function getCredentials(callback, errorCallback) {
             }
         } else {
             if (err.code === 'ENOENT') {
+                requestForCredentials(req, callback, errCallback)
             } else {
-                errorCallback();
+                errCallback();
             }
         }
     });
@@ -122,9 +133,10 @@ function getNewToken(oauth2Client, callback) {
 
 module.exports = {
     "getOAuth2Client": getOAuth2Client,
-    "storeCredentials": storeCredentials,
     "getCredentials": getCredentials,
+    "deleteCredentials": deleteCredentials,
     "storeTokens": storeTokens,
     "getNewToken": getNewToken,
-    "authorize": authorize
+    "authorize": authorize,
+    "requestForCredentials": requestForCredentials
 };

@@ -7,6 +7,7 @@ const LocalStrategy = require('passport-local').Strategy;
 
 // load up the user model
 const User = require('../app/models/user');
+const googleTools = require('../app/googleTools');
 
 // load the auth variables
 const configAuth = require('./auth'); // use this one for testing
@@ -21,9 +22,6 @@ module.exports = function (passport) {
 
     // used to serialize the user for the session
     passport.serializeUser(function (user, done) {
-        if (user.token !== undefined && user.token !== '' ) {
-
-        }
         done(null, user.id);
     });
 
@@ -358,9 +356,23 @@ module.exports = function (passport) {
                     let user = req.user; // pull the user out of the session
 
                     user.google.id = profile.id;
-                    user.google.token = token;
                     user.google.name = profile.displayName;
                     user.google.email = (profile.emails[0].value || '').toLowerCase(); // pull the first email
+
+                    if (req.cookies.google_auth_renew_token) {
+                        googleTools.requestForCredentials(req, function (tokens) {
+                            user.google.token = tokens.token;
+                            user.save(function (err) {
+                                if (err)
+                                    return done(err);
+                                return done(null, user);
+                            });
+                            req.res.clearCookie("google_auth_renew_token");
+                            req.res.clearCookie("google_auth_code");
+                        }, function () {
+                            return done(null, false);
+                        })
+                    }
 
                     user.save(function (err) {
                         if (err)
@@ -375,4 +387,16 @@ module.exports = function (passport) {
 
         }));
 
+    function resetUser(user, callback) {
+        user.google.token = undefined;
+        user.save(function (err) {
+            if (!err) {
+                if (callback !== undefined && typeof callback === 'function') {
+                    callback();
+                }
+            }
+        });
+    }
+
 };
+

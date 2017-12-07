@@ -3,10 +3,10 @@ const googleTools = require('../app/googleTools');
 const calendar = google.calendar('v3');
 let calendarParams = require('../config/settings').calendarParams;
 
-function getEventsFromAllCalendars(callback) {
+function getEventsFromAllCalendars(req, callback, errCallback) {
     const calendarIds = [];
     const oAuth2Client = googleTools.getOAuth2Client();
-    googleTools.getCredentials(
+    googleTools.getCredentials(req,
         function (credentials) {
             oAuth2Client.credentials = credentials;
             calendarParams.auth = oAuth2Client;
@@ -20,7 +20,8 @@ function getEventsFromAllCalendars(callback) {
                     callback(calendarIds);
                 }
             });
-        }
+        },
+        errCallback
     );
     return calendarIds;
 }
@@ -58,13 +59,7 @@ function listEvents(auth, params_, calendarId) {
 }
 
 module.exports = {
-    get: function (auth, callback) {
-        // Authorize a client with the loaded credentials, then call the
-        // Google Calendar API.
-        if (auth === undefined) {
-            googleTools.authorize(getEventsFromAllCalendars(callback));
-        } else {
-            getEventsFromAllCalendars(callback)
-        }
+    get: function (req, callback, errCallback) {
+        getEventsFromAllCalendars(req, callback, errCallback);
     }
 };

@@ -56,19 +56,27 @@ app.use(passport.session()); // persistent login sessions
 app.use(flash()); // use connect-flash for flash messages stored in session
 
 app.use(favicon(path.join(__dirname + WEB_PATH, 'public', 'favicon.ico')));
-// set a cookie
+
+// set a cookie for temporally storing google code
 app.use(function (req, res, next) {
     // check if client sent cookie
-    let cookie = req.cookies.token;
+    let cookie = req.cookies.google_auth_code;
     if (cookie === undefined || cookie === 'undefined') {
-        res.cookie('token', req.query.code);
+        if (req.query.code === undefined) {
+            res.clearCookie("google_auth_code");
+        } else {
+            console.log("Saved cookie with new google oauth code");
+            res.cookie('google_auth_code', req.query.code);
+        }
     } else {
         if (req.query.code !== undefined && cookie !== req.query.code) {
-            res.cookie('token', req.query.code);
+            console.log("Saved cookie with new google oauth code");
+            res.cookie('google_auth_code', req.query.code);
         }
     }
-    next(); // <-- important!
+    next();
 });
+
 app.use(express.static(path.join(__dirname + WEB_PATH, 'public')));
 
 
