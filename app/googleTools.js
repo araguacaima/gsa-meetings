@@ -14,7 +14,7 @@ function getOAuth2Client() {
     return new auth_.OAuth2(clientId, clientSecret, redirectUrl);
 }
 
-function storeCredentials(req, res, callback) {
+function storeCredentials(req, res, callback, errCallBack) {
     const code = req.cookies.token;
     const oAuth2Client = this.getOAuth2Client();
     res.clearCookie("token");
@@ -25,7 +25,7 @@ function storeCredentials(req, res, callback) {
                 callback(tokens);
             }
         } else {
-            getNewToken(oAuth2Client);
+            errCallBack();
         }
     });
 }
@@ -34,7 +34,7 @@ function getCredentials(callback, errorCallback) {
     fs.readFile(TOKEN_PATH, function (err, credentials) {
         if (!err) {
             try {
-                const tokens = JSON.parse(credentials);
+                const tokens = JSON.parsFe(credentials);
                 if (callback !== undefined) {
                     callback(tokens);
                 }
@@ -105,7 +105,7 @@ function authorize(callback) {
  * execute the given callback with the authorized OAuth2 client.
  *
  * @param {google.auth.OAuth2} oauth2Client The OAuth2 client to get token for.
- * @param {getEventsCallback} callback The callback to call with the authorized
+ * @param {callback} callback The callback to call with the authorized
  *     client.
  */
 function getNewToken(oauth2Client, callback) {
@@ -115,18 +115,8 @@ function getNewToken(oauth2Client, callback) {
         } else {
             oauth2Client.credentials = tokens;
             storeTokens(tokens);
-            callback(oauth2Client);
+            callback(tokens);
         }
-    });
-
-    oauth2Client.getToken(code, function (err, token) {
-        if (err) {
-            console.log('Error while trying to retrieve access token', err);
-            return;
-        }
-        oauth2Client.credentials = token;
-        storeTokens(token);
-        callback(oauth2Client);
     });
 }
 

@@ -16,7 +16,7 @@ module.exports = function (router, passport) {
     // show the home page (will also have our login links)
     router.get('/calendars', isLoggedIn, function (req, res) {
         googleTools.getCredentials(function (credentials) {
-            calendars.get(credentials, function(calendarIds ) {
+            calendars.get(credentials, function (calendarIds) {
                 res.render('calendars', {
                     title: 'GSA | Calendars',
                     calendarIds: calendarIds
@@ -113,7 +113,12 @@ module.exports = function (router, passport) {
     // google ---------------------------------
 
     // send to google to do the authentication
-    router.get('/auth/google', passport.authenticate('google', {scope: ['profile', 'email'].concat(auth.scopes)}));
+    router.get('/auth/google',
+        passport.authenticate('google', {
+                scope: ['profile', 'email'].concat(auth.scopes),
+                access_type: "offline"
+            }
+        ));
 
     // the callback after google has authenticated the user
 
@@ -211,15 +216,24 @@ module.exports = function (router, passport) {
 
     // google ---------------------------------
     router.get('/unlink/google', isLoggedIn, function (req, res) {
-        const user = req.user;
-        user.google.token = undefined;
-        user.save(function (err) {
+        resetUser(req, function () {
             res.redirect('/login');
         });
     });
 
-
 };
+
+function resetUser(req, callback) {
+    const user = req.user;
+    user.google.token = undefined;
+    user.save(function (err) {
+        if (!err) {
+            if (callback !== undefined && typeof callback === 'function') {
+                callback();
+            }
+        }
+    });
+}
 
 // Simple route middleware to ensure user is authenticated.
 //   Use this route middleware on any resource that needs to be protected.  If
@@ -229,9 +243,12 @@ module.exports = function (router, passport) {
 function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         if (req.cookies.token !== undefined && req.cookies.token !== 'undefined') {
-            googleTools.storeCredentials(req, res);
+            resetUser(req);
+            googleTools.storeCredentials(req, res, next, function () {
+                res.redirect('/unlink/google')
+            });
         }
-        return next();
+        // return next();
     } else {
         res.redirect('/auth/google');
     }
