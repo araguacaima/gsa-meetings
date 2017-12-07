@@ -34,7 +34,7 @@ function getCredentials(callback, errorCallback) {
     fs.readFile(TOKEN_PATH, function (err, credentials) {
         if (!err) {
             try {
-                const tokens = JSON.parsFe(credentials);
+                const tokens = JSON.parse(credentials);
                 if (callback !== undefined) {
                     callback(tokens);
                 }

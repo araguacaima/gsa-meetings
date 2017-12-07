@@ -244,11 +244,9 @@ function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         if (req.cookies.token !== undefined && req.cookies.token !== 'undefined') {
             resetUser(req);
-            googleTools.storeCredentials(req, res, next, function () {
-                res.redirect('/unlink/google')
-            });
+            googleTools.storeCredentials(req, res);
         }
-        // return next();
+        return next();
     } else {
         res.redirect('/auth/google');
     }

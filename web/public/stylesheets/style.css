@@ -83,14 +83,13 @@ section {
 body {
   font: 62.5%/1.5 Helvetica, Arial, "Lucida Grande", "Lucida Sans", Tahoma, Verdana, sans-serif;
   text-align: center;
-  background: #000;
+  background: #fff;
 }
 #wrapper {
   width: 920px;
   text-align: left;
-  margin-left: auto;
-  margin-right: auto;
-  background: #fff;
+  margin: 15px auto;
+  background: #cccccc;
   padding: 20px;
   -webkit-border-bottom-left-radius: 15px;
   -moz-border-bottom-left-radius: 15px;
@@ -100,6 +99,15 @@ body {
   -moz-border-bottom-right-radius: 15px;
   -o-border-bottom-right-radius: 15px;
   border-bottom-right-radius: 15px;
+
+  -webkit-border-top-left-radius: 15px;
+  -moz-border-top-left-radius: 15px;
+  -o-border-top-left-radius: 15px;
+  border-top-left-radius: 15px;
+  -webkit-border-top-right-radius: 15px;
+  -moz-border-top-right-radius: 15px;
+  -o-border-top-right-radius: 15px;
+  border-top-right-radius: 15px;
 }
 /* Typography
 -----------------------------------------------------------------------------*/
@@ -186,7 +194,13 @@ acronym {
   vertical-align: top;
   width: 50%;
 }
-.css-table .two-column .cell * {
+.css-table .two-column .cell .logo {
+
+}
+.css-table .two-column .cell .menu {
+
+}
+.css-table .two-column .cell .text {
   width: 90%;
 }
 .css-table .three-column {

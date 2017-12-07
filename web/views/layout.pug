@@ -9,21 +9,26 @@ html(xmlns='http://www.w3.org/1999/xhtml')
     block scripts
   body
     header
-      .container
-        .row
-          .col-sm-1
-            .well
-              nav
-                ul
-                  li
-                    a(href="/")
-                      img(src='/images/gsa-logo-small.png')
-                  li
-                    a(href="/calendars") Calendars
-                  li
-                    a(href="/picker") Picker
-                  li
-                    a.btn.btn-danger(href='/unlink/google') Logout
+      section.css-table
+        section.two-column
+          section.cell
+            .logo
+              a(href="/")
+                img(src='/images/gsa-logo-small.png', style='width=100%')
+          section.cell
+            .menu
+              .container
+                .row
+                  .col-sm-1
+                    .well
+                      nav
+                        ul
+                          li
+                            a(href="/calendars") Calendars
+                          li
+                            a(href="/picker") Picker
+                          li
+                            a.btn.btn-danger(href='/unlink/google') Logout
     section#wrapper
       block content
       footer 
