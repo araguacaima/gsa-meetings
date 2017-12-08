@@ -61,21 +61,44 @@ app.use(favicon(path.join(__dirname + WEB_PATH, 'public', 'favicon.ico')));
 app.use(function (req, res, next) {
     // check if client sent cookie
     let cookie = req.cookies.google_auth_code;
+    const user = req.user;
     if (cookie === undefined || cookie === 'undefined') {
         if (req.query.code === undefined) {
             res.clearCookie("google_auth_code");
         } else {
             console.log("Saved cookie with new google oauth code");
+            if (user) {
+                res.cookie("google_auth_renew_token", true);
+                req.cookies.google_auth_renew_token = true;
+                resetUser(user);
+            }
             res.cookie('google_auth_code', req.query.code);
         }
     } else {
         if (req.query.code !== undefined && cookie !== req.query.code) {
             console.log("Saved cookie with new google oauth code");
+            if (user) {
+                res.cookie("google_auth_renew_token", true);
+                req.cookies.google_auth_renew_token = true;
+                resetUser(user);
+            }
             res.cookie('google_auth_code', req.query.code);
         }
     }
     next();
 });
+
+
+function resetUser(user, callback) {
+    user.google.token = undefined;
+    user.save(function (err) {
+        if (!err) {
+            if (callback !== undefined && typeof callback === 'function') {
+                callback();
+            }
+        }
+    });
+}
 
 app.use(express.static(path.join(__dirname + WEB_PATH, 'public')));
 

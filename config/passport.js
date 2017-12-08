@@ -363,40 +363,25 @@ module.exports = function (passport) {
                         googleTools.requestForCredentials(req, function (tokens) {
                             user.google.token = tokens.token;
                             user.save(function (err) {
-                                if (err)
+                                if (err) {
                                     return done(err);
+                                }
+                                req.res.clearCookie("google_auth_renew_token");
+                                req.res.clearCookie("google_auth_code");
                                 return done(null, user);
                             });
-                            req.res.clearCookie("google_auth_renew_token");
-                            req.res.clearCookie("google_auth_code");
                         }, function () {
                             return done(null, false);
                         })
                     }
-
                     user.save(function (err) {
                         if (err)
                             return done(err);
 
                         return done(null, user);
                     });
-
                 }
-
             });
-
         }));
-
-    function resetUser(user, callback) {
-        user.google.token = undefined;
-        user.save(function (err) {
-            if (!err) {
-                if (callback !== undefined && typeof callback === 'function') {
-                    callback();
-                }
-            }
-        });
-    }
-
 };
 

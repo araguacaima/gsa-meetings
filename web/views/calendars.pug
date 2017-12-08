@@ -6,7 +6,11 @@ block content
   h1 Pick up your calendars.
   .container
     each val in calendarIds
-      .row
-        .col-sm-1
-          input(type='checkbox' name='calendars' id= val value=val)
-          span= val
+      section.css-table
+        section.two-column
+          section.cell
+            .text
+              input(type='checkbox' name='calendars' id= val value=val)
+          section.cell
+            .text
+              h3= val

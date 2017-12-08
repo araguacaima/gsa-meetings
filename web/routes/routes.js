@@ -20,7 +20,6 @@ module.exports = function (router, passport) {
                 calendarIds: calendarIds
             });
         }, function (err) {
-            console.log(err);
             res.redirect('/unlink/google');
         });
     });

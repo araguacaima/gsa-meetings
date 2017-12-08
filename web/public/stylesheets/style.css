@@ -220,6 +220,9 @@ acronym {
   display: table-cell;
   width: 25%;
 }
+.col-sm-1 {
+  float: right;
+}
 /* Header
 -----------------------------------------------------------------------------*/
 header {
