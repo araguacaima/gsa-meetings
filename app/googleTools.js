@@ -32,17 +32,21 @@ function requestForCredentials(req, callback, errCallBack) {
     });
 }
 
-function deleteCredentials(userId) {
+function deleteCredentials(userId, callback) {
     try {
         fs.unlinkSync(TOKEN_PATH);
     } catch (err) {
         console.log(err.message)
     }
-    User.findById(userId, function (err, user) {
+    User.findOne({'google.id': userId}, function (err, user) {
         if (!err) {
             user.google.token = undefined;
             user.google.reset = true;
-            user.save();
+            user.save(function (err) {
+                if (!err) {
+                    callback();
+                }
+            });
         }
     });
 }

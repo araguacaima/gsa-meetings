@@ -2,8 +2,33 @@ extends layout
 
 block title
   title= title
+block scripts
+  script(type='text/javascript', src='/javascripts/jquery-3.2.1.js')
+  link(rel='stylesheet', href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
+  link(rel='stylesheet', href='/bower_components/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css')
+  script(type='text/javascript', src='/bower_components/moment/min/moment.min.js')
+  script(type='text/javascript', src='/bower_components/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js')
+  script.
+    $(function () {
+      var $startDate = $('#start_date');
+      var $endDate = $('#end_date');
+      $startDate.datetimepicker({
+        daysOfWeekDisabled: [0, 6]
+      });
+      $endDate.datetimepicker({
+        useCurrent: false,
+        daysOfWeekDisabled: [0, 6]
+      });
+      $startDate.on("dp.change", function (e) {
+        $('#end_date').data("DateTimePicker").minDate(e.date);
+      });
+      $endDate.on("dp.change", function (e) {
+        $('#start_date').data("DateTimePicker").maxDate(e.date);
+      });
+    });
 block content
   h1 Pick up your calendars.
+  br
   .container
     each val in calendarIds
       section.css-table
@@ -14,7 +39,18 @@ block content
           section.cell(style="color: #555555")
             .text
               h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px")= val
-    .jumbotron.text-center
-      a.btn.btn-danger(href='/auth/google')
-        span.fa.fa-calendar
-        |&nbsp;Get Events
+        section.two-column(style="display: inline-block")
+          section.cell
+            div#start_date.text.form-group.input-group.date
+              input.form-control(type='text')
+              span.input-group-addon
+                span.glyphicon.glyphicon-calendar
+        section.cell
+            div#end_date.text.form-group.input-group.date
+              input.form-control(type='text')
+              span.input-group-addon
+                span.glyphicon.glyphicon-calendar
+  .text-center(style="margin: 30px;")
+    a.btn.btn-danger(href='/auth/google')
+      span.fa.fa-calendar
+      |&nbsp;Get Events

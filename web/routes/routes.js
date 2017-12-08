@@ -51,9 +51,14 @@ module.exports = function (router, passport) {
 
     // LOGOUT ==============================
     router.get('/logout', function (req, res) {
-        googleTools.deleteCredentials(req.cookies.userId);
-        req.logout();
-        res.redirect('/login');
+        googleTools.deleteCredentials(req.cookies.userId, function (err) {
+            req.logout();
+            if (err) {
+                res.redirect('/login');
+            } else {
+                res.redirect('/');
+            }
+        });
     });
 
     // send to google to do the authentication

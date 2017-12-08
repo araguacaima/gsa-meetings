@@ -90,7 +90,10 @@ body {
   text-align: left;
   margin: 15px auto;
   background: #eeeeee;
-  padding: 20px;
+  padding-top: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 0.2em;
   -webkit-border-bottom-left-radius: 15px;
   -moz-border-bottom-left-radius: 15px;
   -o-border-bottom-left-radius: 15px;
@@ -265,7 +268,7 @@ header nav ul li a:hover {
 footer {
   color: #666;
   border-top: 1px solid #ccc;
-  padding-top: 1.5em;
+  padding-top: 0.3em;
 }
 footer ul {
   list-style: none;
