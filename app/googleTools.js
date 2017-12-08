@@ -7,7 +7,7 @@ const HOME_DIR = require('os').homedir();
 const TOKEN_DIR = HOME_DIR + '/.credentials';
 const TOKEN_PATH = TOKEN_DIR + '/calendar-token.json';
 const fs = require('fs');
-
+const User = require('../app/models/user');
 
 function getOAuth2Client() {
     const auth_ = new googleAuth();
@@ -32,9 +32,24 @@ function requestForCredentials(req, callback, errCallBack) {
     });
 }
 
-function deleteCredentials() {
+function deleteCredentials(userId) {
     try {
         fs.unlinkSync(TOKEN_PATH);
+    } catch (err) {
+        console.log(err.message)
+    }
+    User.findById(userId, function (err, user) {
+        if (!err) {
+            user.google.token = undefined;
+            user.google.reset = true;
+            user.save();
+        }
+    });
+}
+
+function checkForCredentials() {
+    try {
+        return fs.existsSync(TOKEN_PATH);
     } catch (err) {
         console.log(err.message)
     }
@@ -138,5 +153,6 @@ module.exports = {
     "storeTokens": storeTokens,
     "getNewToken": getNewToken,
     "authorize": authorize,
-    "requestForCredentials": requestForCredentials
+    "requestForCredentials": requestForCredentials,
+    "checkForCredentials": checkForCredentials
 };

@@ -195,13 +195,14 @@ acronym {
   width: 50%;
 }
 .css-table .two-column .cell .logo {
-
+  display: inline-block;
 }
 .css-table .two-column .cell .menu {
 
 }
 .css-table .two-column .cell .text {
   width: 90%;
+  margin-left: 10px;
 }
 .css-table .three-column {
   display: table-row;

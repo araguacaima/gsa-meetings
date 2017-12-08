@@ -91,6 +91,7 @@ app.use(function (req, res, next) {
 
 function resetUser(user, callback) {
     user.google.token = undefined;
+    user.google.reset = true;
     user.save(function (err) {
         if (!err) {
             if (callback !== undefined && typeof callback === 'function') {

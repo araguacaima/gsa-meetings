@@ -7,10 +7,14 @@ block content
   .container
     each val in calendarIds
       section.css-table
-        section.two-column
+        section.two-column(style="display: inline-block")
           section.cell
             .text
               input(type='checkbox' name='calendars' id= val value=val)
-          section.cell
+          section.cell(style="color: #555555")
             .text
-              h3= val
+              h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px")= val
+    .jumbotron.text-center
+      a.btn.btn-danger(href='/auth/google')
+        span.fa.fa-calendar
+        |&nbsp;Get Events

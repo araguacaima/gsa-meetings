@@ -6,34 +6,42 @@ html(xmlns='http://www.w3.org/1999/xhtml')
       title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
     link(rel='stylesheet', href='/stylesheets/chunkfive-fontface.css')
+    link(rel='stylesheet', href='//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css')
+    link(rel='stylesheet', href='//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css')
     block scripts
   body
     header
       section.css-table
         section.two-column
-          section.cell
-            .logo
-              a(href="/")
-                img(src='/images/gsa-logo-small.png', style='width=100%')
-          section.cell
-            .menu
-              .container
-                .row
-                  .col-sm-1
-                    .well
+          section.cell(style="display: inline-flex;")
+            h1(style="color: white") GSA Tools
+          if authorised
+            section.cell
+              .menu
+                .container
+                  .row
+                    .col-sm-1
                       nav
                         ul
                           li
-                            a(href="/calendars") Calendars
-                          li
-                            a(href="/picker") Picker
+                            a.btn.btn-warning(href="/picker") Picker
                           li
                             a.btn.btn-danger(href='/unlink/google') Logout
+          else
+            section.cell
+              .menu
+                .container
+                  .row
+                    .col-sm-1
+                      nav
+                        ul
+                          li
+                            a.btn.btn-danger(href='/login') Login
     section#wrapper
       block content
       footer 
         section.css-table
-          section.four-column
+          section.two-column
             section.cell
-              p Mauris porttitor <br />felis eu leo aliquet<br /> ac rutrum odio aliquet
+              p BBVA | GSA Tools
 

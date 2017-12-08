@@ -1,30 +1,64 @@
 extends layout
 
 block content
-  h1  Morbi elementum, sapien sit amet vehicula tincidunt, lorem purus vehicula purus, ut tempor libero sem at orci.
+  //section.css-table
+  //  section.two-column
+  //    section.cell
+  //      .text
+  //        h2 Tool 1
+  //        p Lorem ipsum dolar sit amet, cons incidunt ut labore et dolore magn trud exercitation ullamcorpor susc vel eum irure dolor in reprehende dolore eu fugiat nulla pariatur.
+  //        p At lupatum delenit aigue duos dolor tempor sunt in culpa qui officia d dereud facils est er expedit distinc peccand quaerer en imigent cupidat. Incita visset, accom ex robore ad quam vis vadisen vlavis confecs nis revinc tae. Ietm hae magnitu dine for super oper mari aggere. Oppidi his mowni bus suifs fortunis desp erate coe magno recipei ban ibi se rursus isdem opport unitel rursus isdem opport loci defen porti busi. Navigandi ad nunc. Que neque pedibus ipsorum, naves ad hunc mod arm aeque, erant fere situs oppi dorum ut facilus. Vada ac desussum aestus exipe aditurn habere ex alto.
+  //    section.cell
+  //      .text
+  //        h2 Tool 2
+  //        p Lorem ipsum dolar sit amet, cons incidunt ut labore et dolore magn trud exercitation ullamcorpor susc vel eum irure dolor in reprehende dolore eu fugiat nulla pariatur.
+  //        p At lupatum delenit aigue duos dolor tempor sunt in culpa qui officia d dereud facils est er expedit distinc peccand quaerer en imigent cupidat. Incita visset, accom ex robore ad quam vis vadisen vlavis confecs nis revinc tae. Ietm hae magnitu dine for super oper mari aggere. Oppidi his mowni bus suifs fortunis desp erate coe magno recipei ban ibi se rursus isdem opport unitel rursus isdem opport loci defen porti busi. Navigandi ad nunc. Que neque pedibus ipsorum, naves ad hunc mod arm aeque, erant fere situs oppi dorum ut facilus. Vada ac desussum aestus exipe aditurn habere ex alto.
+  //section.css-table
+  //  section.three-column
+  //    section.cell
+  //      .text
+  //        h3 Tool 3
+  //        p Lorem ipsum dolar sit amet, cons incidunt ut labore et dolore magn trud exercitation ullamcorpor susc vel eum irure dolor in reprehende dolore eu fugiat nulla pariatur.
+  //    section.cell
+  //      .text
+  //        h3 Phasellus lacus
+  //        p Lorem ipsum dolar sit amet, cons incidunt ut labore et dolore magn trud exercitation ullamcorpor susc vel eum irure dolor in reprehende dolore eu fugiat nulla pariatur.
+  //    section.cell
+  //      .text
+  //        h3 Aliquam vulputate
+  //        p Lorem ipsum dolar sit amet, cons incidunt ut labore et dolore magn trud exercitation ullamcorpor susc vel eum irure dolor in reprehende dolore eu fugiat nulla pariatur.
   section.css-table
     section.two-column
       section.cell
-        .text
-          h2 Donec imperdiet
-          p Lorem ipsum dolar sit amet, cons incidunt ut labore et dolore magn trud exercitation ullamcorpor susc vel eum irure dolor in reprehende dolore eu fugiat nulla pariatur.
-          p At lupatum delenit aigue duos dolor tempor sunt in culpa qui officia d dereud facils est er expedit distinc peccand quaerer en imigent cupidat. Incita visset, accom ex robore ad quam vis vadisen vlavis confecs nis revinc tae. Ietm hae magnitu dine for super oper mari aggere. Oppidi his mowni bus suifs fortunis desp erate coe magno recipei ban ibi se rursus isdem opport unitel rursus isdem opport loci defen porti busi. Navigandi ad nunc. Que neque pedibus ipsorum, naves ad hunc mod arm aeque, erant fere situs oppi dorum ut facilus. Vada ac desussum aestus exipe aditurn habere ex alto.
+        // Google Calendar
+        .col-sm-6
+          a.btn.btn-warning(href='/calendars')
+            h2.text-danger
+              span.fa.fa-calendar
+              |&nbsp;Calendar
+            p Google Calendar to Jira
       section.cell
-        .text
-          h2 Nunc sodales
-          p Lorem ipsum dolar sit amet, cons incidunt ut labore et dolore magn trud exercitation ullamcorpor susc vel eum irure dolor in reprehende dolore eu fugiat nulla pariatur.
-          p At lupatum delenit aigue duos dolor tempor sunt in culpa qui officia d dereud facils est er expedit distinc peccand quaerer en imigent cupidat. Incita visset, accom ex robore ad quam vis vadisen vlavis confecs nis revinc tae. Ietm hae magnitu dine for super oper mari aggere. Oppidi his mowni bus suifs fortunis desp erate coe magno recipei ban ibi se rursus isdem opport unitel rursus isdem opport loci defen porti busi. Navigandi ad nunc. Que neque pedibus ipsorum, naves ad hunc mod arm aeque, erant fere situs oppi dorum ut facilus. Vada ac desussum aestus exipe aditurn habere ex alto.
-  section.css-table
-    section.three-column
+        // Trello
+        .col-sm-6
+          a.btn.btn-default(href='#')
+            h2.text-primary
+              span.fa.fa-trello
+              |&nbsp;Trello
+            p Trello to Jira
+    section.two-column
       section.cell
-        .text
-          h3 Etiam lobortis
-          p Lorem ipsum dolar sit amet, cons incidunt ut labore et dolore magn trud exercitation ullamcorpor susc vel eum irure dolor in reprehende dolore eu fugiat nulla pariatur.
+        // Other tool 1
+        .col-sm-6
+          a.btn.btn-info(href='#')
+            h2.text-danger
+              span.fa.fa-twitter
+              |&nbsp;Other tool 1
+            p Other tool 1
       section.cell
-        .text
-          h3 Phasellus lacus
-          p Lorem ipsum dolar sit amet, cons incidunt ut labore et dolore magn trud exercitation ullamcorpor susc vel eum irure dolor in reprehende dolore eu fugiat nulla pariatur.
-      section.cell
-        .text
-          h3 Aliquam vulputate
-          p Lorem ipsum dolar sit amet, cons incidunt ut labore et dolore magn trud exercitation ullamcorpor susc vel eum irure dolor in reprehende dolore eu fugiat nulla pariatur.
+        // Other tool 2
+        .col-sm-6
+          a.btn.btn-danger(href='#')
+            h2.text-success
+              span.fa.fa-twitter
+              | &nbsp;Other tool 2
+            p Other tool 2
