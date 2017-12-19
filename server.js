@@ -19,6 +19,8 @@ const auth = require('./config/auth').googleAuth;
 const favicon = require('serve-favicon');
 const path = require('path');
 
+const googleTools = require('./app/googleTools');
+
 // configuration ===============================================================
 mongoose.connect(configDB.url); // connect to our database
 
@@ -43,6 +45,7 @@ app.use(bodyParser.json()); // get information from html forms
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.set('views', path.join(__dirname + WEB_PATH, 'views'));
+app.use('/bower_components',  express.static(__dirname + '/bower_components'));
 app.set('view engine', 'pug'); // set up ejs for templating
 
 // required for passport
@@ -59,39 +62,51 @@ app.use(favicon(path.join(__dirname + WEB_PATH, 'public', 'favicon.ico')));
 
 // set a cookie for temporally storing google code
 app.use(function (req, res, next) {
-    // check if client sent cookie
-    let cookie = req.cookies.google_auth_code;
-    const user = req.user;
-    if (cookie === undefined || cookie === 'undefined') {
-        if (req.query.code === undefined) {
-            res.clearCookie("google_auth_code");
-        } else {
-            console.log("Saved cookie with new google oauth code");
-            if (user) {
-                res.cookie("google_auth_renew_token", true);
-                req.cookies.google_auth_renew_token = true;
-                resetUser(user);
+        // check if client sent cookie
+        let cookie = req.cookies.google_auth_code;
+        const user = req.user;
+        if (cookie === undefined || cookie === 'undefined') {
+            if (req.query.code === undefined) {
+                res.clearCookie("google_auth_code");
+            } else {
+                console.log("Saved cookie with new google oauth code");
+                if (user) {
+                    if (googleTools.checkForCredentials()) {
+                        res.cookie("google_auth_renew_token", true);
+                        req.cookies.google_auth_renew_token = true;
+                        resetUser(user);
+                    } else {
+                        user.google.reset = !!user.google.token;
+                        user.save();
+                    }
+                }
+                res.cookie('google_auth_code', req.query.code);
             }
-            res.cookie('google_auth_code', req.query.code);
         }
-    } else {
-        if (req.query.code !== undefined && cookie !== req.query.code) {
-            console.log("Saved cookie with new google oauth code");
-            if (user) {
-                res.cookie("google_auth_renew_token", true);
-                req.cookies.google_auth_renew_token = true;
-                resetUser(user);
+        else {
+            if (req.query.code !== undefined && cookie !== req.query.code) {
+                console.log("Saved cookie with new google oauth code");
+                if (user) {
+                    if (googleTools.checkForCredentials()) {
+                        res.cookie("google_auth_renew_token", true);
+                        req.cookies.google_auth_renew_token = true;
+                        resetUser(user);
+                    } else {
+                        user.google.reset = !!user.google.token;
+                        user.save();
+                    }
+                }
+                res.cookie('google_auth_code', req.query.code);
             }
-            res.cookie('google_auth_code', req.query.code);
         }
+        next();
     }
-    next();
-});
+);
 
 
 function resetUser(user, callback) {
     user.google.token = undefined;
-    user.google.reset = true;
+    user.google.reset = false;
     user.save(function (err) {
         if (!err) {
             if (callback !== undefined && typeof callback === 'function') {

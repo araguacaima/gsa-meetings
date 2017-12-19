@@ -1,6 +1,9 @@
 const auth = require('../../config/auth').googleAuth;
 const calendars = require('../../app/calendars');
 const googleTools = require('../../app/googleTools');
+const dateFormatRFC3339 = require('../../config/settings').dateFormatRFC3339;
+const timezone = require('../../config/settings').timezone;
+const showableDateFormat = require('../../config/settings').showableDateFormat;
 
 module.exports = function (router, passport) {
 
@@ -8,7 +11,22 @@ module.exports = function (router, passport) {
     router.get('/', ensureAuthenticated, function (req, res) {
         res.render('index', {
             title: 'GSA Tools',
+            config: auth,
             authorised: req.isAuthenticated()
+        });
+    });
+
+
+    // show the home page (will also have our login links)
+    router.get('/calendars-details', ensureAuthenticated, function (req, res) {
+        calendars.getEvents(req, function (calendarIds) {
+            res.render('calendars-details', {
+                title: 'GSA | Calendars Details',
+                calendarIds: calendarIds,
+                authorised: req.isAuthenticated()
+            });
+        }, function (err) {
+            res.redirect('/logout');
         });
     });
 
@@ -18,7 +36,10 @@ module.exports = function (router, passport) {
             res.render('calendars', {
                 title: 'GSA | Calendars',
                 calendarIds: calendarIds,
-                authorised: req.isAuthenticated()
+                authorised: req.isAuthenticated(),
+                dateFormat: dateFormatRFC3339,
+                timezone: timezone,
+                showableDateFormat: showableDateFormat
             });
         }, function (err) {
             res.redirect('/logout');
@@ -105,8 +126,8 @@ function ensureAuthenticated(req, res, next) {
         if (googleTools.checkForCredentials()) {
             res.redirect('/auth/google');
         } else {
-            res.cookie("google_auth_renew_token", true);
-            req.cookies.google_auth_renew_token = true;
+            // res.cookie("google_auth_renew_token", true);
+            // req.cookies.google_auth_renew_token = true;
             res.redirect('/login');
         }
     }

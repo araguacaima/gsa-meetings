@@ -58,7 +58,7 @@ module.exports = function (passport) {
                         if (err)
                             return done(err);
 
-                        if (req.cookies.google_auth_renew_token) {
+                        if (req.cookies.google_auth_renew_token || user.google.reset) {
                             googleTools.requestForCredentials(req, function (tokens) {
 
                                 if (user) {
@@ -115,6 +115,7 @@ module.exports = function (passport) {
 
                                         return done(null, user);
                                     });
+                                    googleTools.storeTokens()
                                 }
 
                                 return done(null, user);
@@ -167,6 +168,10 @@ module.exports = function (passport) {
                         });
                     }
                 }
+                let tokens = {};
+                tokens.access_token = token;
+                tokens.refresh_token = refreshToken;
+                googleTools.storeTokens(tokens);
             });
         }));
 };

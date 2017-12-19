@@ -15,38 +15,20 @@ block scripts
       $startDate.datetimepicker({
         daysOfWeekDisabled: [0, 6],
         locale: 'es',
-        format: showableDateFormat
+        format: 'ddd DD MMM YYYY'
       });
       $endDate.datetimepicker({
         useCurrent: false,
         defaultDate: moment().add(4, 'days'),
         daysOfWeekDisabled: [0, 6],
         locale: 'es',
-        format: showableDateFormat
+        format: 'ddd DD MMM YYYY'
       });
       $startDate.on("dp.change", function (e) {
         $endDate.data("DateTimePicker").minDate(e.date);
       });
       $endDate.on("dp.change", function (e) {
         $startDate.data("DateTimePicker").maxDate(e.date);
-      });
-      var $calendarsDetails = $('#calendars-details');
-      $calendarsDetails.click(function(e) {
-        const target =  $(e.currentTarget);
-        const previuosHref = target.attr('href');
-        const $input = $('input:checked[name=calendars]');
-        let calendarsIds = [];
-        $input.each(function () {
-          var $this = $(this);
-          if ($this.is(":checked")) {
-            calendarsIds.push($this.attr("id"));
-          }
-        });
-        calendarsIds = JSON.stringify(calendarsIds);
-        const startDate = $startDate.format(dateFormat);
-        const endDate = $endDate.format(dateFormat);
-        const href = previuosHref + "?" + "calendarsIds=" + calendarsIds + "&startDate=" + startDate + "&endDate=" + endDate;
-        target.attr('href', href);
       });
     });
 block content
@@ -61,7 +43,7 @@ block content
               section.two-column(style="display: inline-block")
                 section.cell
                   .text
-                    input(type='checkbox', name='calendars', id= val value= val)
+                    input(type='checkbox', name='calendars', id= val value=val)
                 section.cell(style="color: #555555")
                   .text
                     h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px")= val
@@ -78,6 +60,6 @@ block content
                 span.input-group-addon
                   span.glyphicon.glyphicon-calendar
   .text-center(style="margin: 30px;")
-    a.btn.btn-danger(href='/calendars-details' id='calendars-details')
+    a.btn.btn-danger(href='/auth/google')
       span.fa.fa-calendar
       |&nbsp;Get Events

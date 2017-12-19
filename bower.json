@@ -1,0 +1,21 @@
+{
+  "name": "gsa-meetings",
+  "description": "",
+  "main": "server.js",
+  "authors": [
+    "Alex <alejandromanuel.mendez.aragua@bbva.com>"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/araguacaima/gsa-meetings",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "eonasdan-bootstrap-datetimepicker": "^4.17.47",
+    "bootstrap": "^3.3.7"
+  }
+}

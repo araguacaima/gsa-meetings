@@ -41,7 +41,7 @@ function deleteCredentials(userId, callback) {
     User.findOne({'google.id': userId}, function (err, user) {
         if (!err) {
             user.google.token = undefined;
-            user.google.reset = true;
+            user.google.reset = false;
             user.save(function (err) {
                 if (!err) {
                     callback();

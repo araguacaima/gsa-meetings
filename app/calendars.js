@@ -1,16 +1,18 @@
 const google = require('googleapis');
 const googleTools = require('../app/googleTools');
 const calendar = google.calendar('v3');
-let calendarParams = require('../config/settings').calendarParams;
+let calendarListParams = require('../config/settings').calendarListParams;
+let calendarEventsParams = require('../config/settings').calendarEventsParams;
+const timezone = require('../config/settings').timezone;
 
-function getEventsFromAllCalendars(req, callback, errCallback) {
+function getAllCalendars(req, callback, errCallback) {
     const calendarIds = [];
     const oAuth2Client = googleTools.getOAuth2Client();
     googleTools.getCredentials(req,
         function (credentials) {
             oAuth2Client.credentials = credentials;
-            calendarParams.auth = oAuth2Client;
-            calendar.calendarList.list(calendarParams, function (err, calendars) {
+            calendarListParams.auth = oAuth2Client;
+            calendar.calendarList.list(calendarListParams, function (err, calendars) {
                 if (err) {
                     console.log(err.message);
                     errCallback(err);
@@ -30,6 +32,41 @@ function getEventsFromAllCalendars(req, callback, errCallback) {
     return calendarIds;
 }
 
+
+function getEventsFromAllCalendars(req, callback, errCallback) {
+    const calendarEvents = [];
+    const oAuth2Client = googleTools.getOAuth2Client();
+    googleTools.getCredentials(req,
+        function (credentials) {
+            oAuth2Client.credentials = credentials;
+            calendarEventsParams.auth = oAuth2Client;
+            calendarEventsParams.timeMin = req.query.startDate;
+            calendarEventsParams.timeMax = req.query.endDate;
+            calendarEventsParams.timezone = timezone;
+            const calendarsIds = JSON.parse(req.query.calendarsIds);
+            calendarsIds.each(function (calendarId) {
+              calendarEventsParams.calendarId = calendarId;
+              calendar.events.list(calendarEventsParams, function (err, events) {
+                if (err) {
+                  console.log(err.message);
+                  errCallback(err);
+                } else {
+                  let calendarsItems = events.filter(function (item) {
+                    return !/(calendar\.google\.com)/.test(item.id);
+                  });
+                  calendarsItems.forEach(calendar =>
+                    calendarEvents.push(calendar.id)
+                  );
+                  callback(calendarEvents);
+                }
+              });
+            })
+        },
+        errCallback
+    );
+    return calendarEvents;
+}
+
 /**
  * Lists the next 10 events on the user's primary calendar.
  *
@@ -40,11 +77,11 @@ function getEventsFromAllCalendars(req, callback, errCallback) {
 function listEvents(auth, params_, calendarId) {
 
     if (params_ === undefined) {
-        params_ = calendarParams;
+        params_ = calendarListParams;
     }
     params_.auth = auth;
     params_.calendarId = calendarId;
-    calendar.events.list(calendarParams, function (err, response) {
+    calendar.events.list(calendarListParams, function (err, response) {
         if (err) {
             console.log('The API returned an error: ' + err);
             return;
@@ -64,6 +101,9 @@ function listEvents(auth, params_, calendarId) {
 
 module.exports = {
     get: function (req, callback, errCallback) {
+        getAllCalendars(req, callback, errCallback);
+    },
+    getEvents: function (req, callback, errCallback) {
         getEventsFromAllCalendars(req, callback, errCallback);
     }
 };
