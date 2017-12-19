@@ -15,14 +15,14 @@ block scripts
       $startDate.datetimepicker({
         daysOfWeekDisabled: [0, 6],
         locale: 'es',
-        format: showableDateFormat
+        format: !{JSON.stringify(showableDateFormat)}
       });
       $endDate.datetimepicker({
         useCurrent: false,
         defaultDate: moment().add(4, 'days'),
         daysOfWeekDisabled: [0, 6],
         locale: 'es',
-        format: showableDateFormat
+        format: !{JSON.stringify(showableDateFormat)}
       });
       $startDate.on("dp.change", function (e) {
         $endDate.data("DateTimePicker").minDate(e.date);
@@ -43,8 +43,8 @@ block scripts
           }
         });
         calendarsIds = JSON.stringify(calendarsIds);
-        const startDate = $startDate.format(dateFormat);
-        const endDate = $endDate.format(dateFormat);
+        const startDate = $startDate.data("DateTimePicker").date().format(!{JSON.stringify(dateFormat)});
+        const endDate = $endDate.data("DateTimePicker").date().format(!{JSON.stringify(dateFormat)});
         const href = previuosHref + "?" + "calendarsIds=" + calendarsIds + "&startDate=" + startDate + "&endDate=" + endDate;
         target.attr('href', href);
       });
