@@ -5,61 +5,23 @@ block title
 block scripts
   script(type='text/javascript', src='/javascripts/jquery-3.2.1.js')
   link(rel='stylesheet', href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
-  link(rel='stylesheet', href='/bower_components/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css')
-  script(type='text/javascript', src='/bower_components/moment/min/moment-with-locales.min.js')
-  script(type='text/javascript', src='/bower_components/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js')
-  script.
-    $(function () {
-      var $startDate = $('#start_date');
-      var $endDate = $('#end_date');
-      $startDate.datetimepicker({
-        daysOfWeekDisabled: [0, 6],
-        locale: 'es',
-        format: 'ddd DD MMM YYYY'
-      });
-      $endDate.datetimepicker({
-        useCurrent: false,
-        defaultDate: moment().add(4, 'days'),
-        daysOfWeekDisabled: [0, 6],
-        locale: 'es',
-        format: 'ddd DD MMM YYYY'
-      });
-      $startDate.on("dp.change", function (e) {
-        $endDate.data("DateTimePicker").minDate(e.date);
-      });
-      $endDate.on("dp.change", function (e) {
-        $startDate.data("DateTimePicker").maxDate(e.date);
-      });
-    });
 block content
-  h1 Pick up your calendars.
+  h1 Manage your events.
   br
   .container
     section.css-table
       section.two-column(style="display: inline-block")
         section.cell
-          each val in calendarIds
+          each val in calendarEvents
             section.css-table
               section.two-column(style="display: inline-block")
                 section.cell
                   .text
-                    input(type='checkbox', name='calendars', id= val value=val)
+                    input(type='checkbox', name='calendarEvents', id= val.id value=val.description)
                 section.cell(style="color: #555555")
                   .text
                     h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px")= val
-        section.cell
-          section.two-column(style="display: inline-block")
-            section.cell
-              div#start_date.text.form-group.input-group.date
-                input.form-control(type='text')
-                span.input-group-addon
-                  span.glyphicon.glyphicon-calendar
-          section.cell
-              div#end_date.text.form-group.input-group.date
-                input.form-control(type='text')
-                span.input-group-addon
-                  span.glyphicon.glyphicon-calendar
   .text-center(style="margin: 30px;")
-    a.btn.btn-danger(href='/auth/google')
+    a.btn.btn-danger(href='/jira/ticket')
       span.fa.fa-calendar
-      |&nbsp;Get Events
+      |&nbsp;Push to Jira

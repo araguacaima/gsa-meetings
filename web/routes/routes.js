@@ -19,10 +19,10 @@ module.exports = function (router, passport) {
 
     // show the home page (will also have our login links)
     router.get('/calendars-details', ensureAuthenticated, function (req, res) {
-        calendars.getEvents(req, function (calendarIds) {
+        calendars.getEvents(req, function (calendarEvents) {
             res.render('calendars-details', {
                 title: 'GSA | Calendars Details',
-                calendarIds: calendarIds,
+                calendarEvents: calendarEvents,
                 authorised: req.isAuthenticated()
             });
         }, function (err) {
