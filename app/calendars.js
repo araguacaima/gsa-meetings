@@ -32,36 +32,49 @@ function getAllCalendars(req, callback, errCallback) {
     return calendarIds;
 }
 
+function getEventsFromCalendarId(calendarEventsParams) {
+    return new Promise(function (resolve, reject) {
+        calendar.events.list(calendarEventsParams, function (err, events) {
+            if (err) {
+                console.log(err.message);
+                reject(err);
+            } else {
+                resolve(events.items.filter(function (item) {
+                    return item.status !== 'cancelled';
+                }));
+            }
+        });
+    });
+}
+
 function getEventsFromAllCalendars(req, callback, errCallback) {
-    const calendarEvents = [];
+    let events = [];
     const oAuth2Client = googleTools.getOAuth2Client();
     const calendarsIds = JSON.parse(req.query.calendarsIds);
     calendarEventsParams.timeMin = req.query.startDate;
     calendarEventsParams.timeMax = req.query.endDate;
     calendarEventsParams.timezone = timezone;
-    calendarsIds.forEach(function (calendarId) {
-      googleTools.getCredentials(req,
+    googleTools.getCredentials(req,
         function (credentials) {
-          oAuth2Client.credentials = credentials;
-          calendarEventsParams.auth = oAuth2Client;
-          calendarEventsParams.calendarId = calendarId;
-          calendar.events.list(calendarEventsParams, function (err, events) {
-            if (err) {
-              console.log(err.message);
-              errCallback(err);
-            } else {
-              let calendarsItems = events.items.filter(function (item) {
-                return item.status !== 'cancelled';
-              });
-              calendarEvents.concat(calendarsItems);
-            }
-          });
-          callback(calendarEvents);
+            oAuth2Client.credentials = credentials;
+            calendarEventsParams.auth = oAuth2Client;
+            const promises = [];
+            calendarsIds.forEach(function (calendarId) {
+                calendarEventsParams.calendarId = calendarId;
+                promises.push(
+                    getEventsFromCalendarId(calendarEventsParams).then(function (result) {
+                        events = events.concat(result);
+                    }).catch(function (err) {
+                        errCallback(err);
+                    }));
+            });
+            Promise.all(promises)
+                .then(() => {
+                    callback(events)
+                });
         },
         errCallback
-      );
-    });
-    return calendarEvents;
+    );
 }
 
 module.exports = {
