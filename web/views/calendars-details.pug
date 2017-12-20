@@ -2,27 +2,37 @@ extends layout
 
 block title
   title= title
-block scripts
 block content
   h1 Manage your events.
   br
-  .container
-    section.css-table
-      section.two-column(style="display: inline-block")
+  form(method='POST' action='/jira/ticket')
+    .container
+      section.css-table
+        section.two-column(style="display: inline-block")
+          section.cell(style="width: 95%")
+            each val in calendarEvents
+              section.css-table
+                section.two-column
+                  section.cell(style="display: table")
+                    .text
+                      input(type='checkbox', name='calendarEvents', id= val.id, value= val.summary)
+                  section.cell(style="color: #555555; width: 100%")
+                    .text
+                      h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px")= val.summary
+          section.cell
+            section.two-column(style="display: inline-block")
+              section.cell
+    if errors
+      section.css-table
         section.cell
-          each val in calendarEvents
-            section.css-table
-              section.two-column(style="display: inline-block")
-                section.cell(style="display: table")
-                  .text
-                    input(type='checkbox', name='calendarEvents', id= val.id, value= val.summary)
-                section.cell(style="color: #555555")
-                  .text
-                    h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px")= val.summary
-        section.cell
-          section.two-column(style="display: inline-block")
-            section.cell
-  .text-center(style="margin: 30px;")
-    a.btn.btn-danger(href='/jira/ticket')
-      span.fa.fa-calendar
-      |&nbsp;Push to Jira
+        for error in errors
+          section.css-table
+            section.cell(style="display: table")
+              .text-danger
+                h4!= error.msg
+      - var jsonString = JSON.stringify(calendarEvents)
+      input(type='hidden', id='completeCalendarEvents', name='completeCalendarEvents', value=jsonString)
+    .text-center(style="margin: 30px;")
+      button.btn.btn-danger(type='submit')
+        span.icon-size-small.icon-jira-alt
+        |&nbsp;Push to Jira

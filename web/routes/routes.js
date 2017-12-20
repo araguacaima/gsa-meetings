@@ -4,6 +4,7 @@ const googleTools = require('../../app/googleTools');
 const dateFormatRFC3339 = require('../../config/settings').dateFormatRFC3339;
 const timezone = require('../../config/settings').timezone;
 const showableDateFormat = require('../../config/settings').showableDateFormat;
+const jiraControllers = require('../controllers/jiraControllers');
 
 module.exports = function (router, passport) {
 
@@ -112,6 +113,9 @@ module.exports = function (router, passport) {
         res.redirect('/login');
     });
 
+    router.post('/jira/ticket', ensureAuthenticated, jiraControllers.createTicket, function (req, res) {
+        res.redirect("/");
+    });
 };
 
 // Simple route middleware to ensure user is authenticated.

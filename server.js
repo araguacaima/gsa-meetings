@@ -11,6 +11,7 @@ const flash = require('connect-flash');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
+const expressValidator = require('express-validator');
 const session = require('express-session');
 
 const configDB = require('./config/database');
@@ -43,6 +44,7 @@ app.use(morgan('dev')); // log every request to the console
 app.use(cookieParser()); // read cookies (needed for auth)
 app.use(bodyParser.json()); // get information from html forms
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(expressValidator());
 
 app.set('views', path.join(__dirname + WEB_PATH, 'views'));
 app.use('/bower_components',  express.static(__dirname + '/bower_components'));
