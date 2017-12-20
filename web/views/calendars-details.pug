@@ -13,12 +13,12 @@ block content
           each val in calendarEvents
             section.css-table
               section.two-column(style="display: inline-block")
-                section.cell
+                section.cell(style="display: table")
                   .text
-                    input(type='checkbox', name='calendarEvents', id= val.id, value= val.description)
+                    input(type='checkbox', name='calendarEvents', id= val.id, value= val.summary)
                 section.cell(style="color: #555555")
                   .text
-                    h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px")= val.description
+                    h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px")= val.summary
         section.cell
           section.two-column(style="display: inline-block")
             section.cell

@@ -4,6 +4,7 @@ const calendar = google.calendar('v3');
 let calendarListParams = require('../config/settings').calendarListParams;
 let calendarEventsParams = require('../config/settings').calendarEventsParams;
 const timezone = require('../config/settings').timezone;
+const commons = require('../app/commons');
 
 function getAllCalendars(req, callback, errCallback) {
     const calendarIds = [];
@@ -63,7 +64,21 @@ function getEventsFromAllCalendars(req, callback, errCallback) {
                 calendarEventsParams.calendarId = calendarId;
                 promises.push(
                     getEventsFromCalendarId(calendarEventsParams).then(function (result) {
-                        events = events.concat(result);
+                        let reformattedEvents = result.map(function (event) {
+                            let reformattedEvent = event;
+                            let description = reformattedEvent.description;
+                            if (description !== undefined) {
+                                if (description.length > 80) {
+                                    description = description.substring(0, 76) + "...";
+                                }
+                                description = description.replace(/<\/?[^>]+(>|$)\r?\n|\r/g, "");
+                                reformattedEvent.description = description;
+                            }
+                            return reformattedEvent;
+                        });
+                        events.concatIfNotExist(reformattedEvents, function (event, previousElement) {
+                            return event.summary === previousElement.summary;
+                        });
                     }).catch(function (err) {
                         errCallback(err);
                     }));
