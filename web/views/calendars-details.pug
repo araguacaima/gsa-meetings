@@ -3,8 +3,6 @@ extends layout
 block title
   title= title
 block scripts
-  script(type='text/javascript', src='/javascripts/jquery-3.2.1.js')
-  link(rel='stylesheet', href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
 block content
   h1 Manage your events.
   br
@@ -17,10 +15,13 @@ block content
               section.two-column(style="display: inline-block")
                 section.cell
                   .text
-                    input(type='checkbox', name='calendarEvents', id= val.id value=val.description)
+                    input(type='checkbox', name='calendarEvents', id= val.id, value= val.description)
                 section.cell(style="color: #555555")
                   .text
-                    h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px")= val
+                    h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px")= val.description
+        section.cell
+          section.two-column(style="display: inline-block")
+            section.cell
   .text-center(style="margin: 30px;")
     a.btn.btn-danger(href='/jira/ticket')
       span.fa.fa-calendar

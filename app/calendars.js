@@ -68,10 +68,9 @@ function getEventsFromAllCalendars(req, callback, errCallback) {
                         errCallback(err);
                     }));
             });
-            Promise.all(promises)
-                .then(() => {
-                    callback(events)
-                });
+            Promise.all(promises).then(() => {
+                callback(events)
+            });
         },
         errCallback
     );
