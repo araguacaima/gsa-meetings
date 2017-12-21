@@ -1,5 +1,6 @@
 const auth = require('../../config/auth').googleAuth;
 const calendars = require('../../app/calendars');
+const jira = require('../../app/jira');
 const googleTools = require('../../app/googleTools');
 const dateFormatRFC3339 = require('../../config/settings').dateFormatRFC3339;
 const timezone = require('../../config/settings').timezone;
@@ -114,7 +115,14 @@ module.exports = function (router, passport) {
     });
 
     router.post('/jira/ticket', ensureAuthenticated, jiraControllers.createTicket, function (req, res) {
-        res.redirect("/");
+        jira.create(req, function (messages) {
+            res.render('index', {
+                title: 'GSA Tools',
+                config: auth,
+                authorised: req.isAuthenticated(),
+                messages: messages
+            });
+        });
     });
 };
 
