@@ -27,6 +27,10 @@ const userSchema = mongoose.Schema({
         email: String,
         name: String,
         reset: Boolean
+    },
+    jira: {
+        id: String,
+        token: String
     }
 
 });

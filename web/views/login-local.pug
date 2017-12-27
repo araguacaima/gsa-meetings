@@ -3,8 +3,10 @@ extends layout
 doctype html
 html
   head
-    title Node Authentication
-    style body         { padding-top:80px; }
+    title= title
+    link(rel='stylesheet', href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
+    link(rel='stylesheet', href='//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css')
+    style body { padding-top:80px; }
   body
     .container
       .col-sm-6.col-sm-offset-3
@@ -15,19 +17,16 @@ html
         .alert.alert-danger <%= message %>
         |  <% } %> 
         // LOGIN FORM 
-        form(action='/login', method='post')
+        form(action='/login/jira', method='post')
           .form-group
-            label Email
-            input.form-control(type='text', name='email')
+            label Username
+            input.form-control(type='text', name='username')
           .form-group
             label Password
             input.form-control(type='password', name='password')
           button.btn.btn-warning.btn-lg(type='submit') Login
         hr
         p
-          | Need an account?
-          a(href='/signup') Signup
-        p
-          | Or go
+          | Go
           a(href='/') home
           | .

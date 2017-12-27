@@ -61,14 +61,17 @@ module.exports = function (passport) {
                         if (req.cookies.google_auth_renew_token || user.google.reset) {
                             googleTools.requestForCredentials(req, function (tokens) {
 
+                                let email = (profile.emails[0].value || '').toLowerCase();
                                 if (user) {
 
                                     // if there is a user id already but no token (user was linked at one point and then removed)
                                     if (!user.google.token) {
                                         user.google.token = tokens.token;
                                         user.google.name = profile.displayName;
-                                        user.google.email = (profile.emails[0].value || '').toLowerCase(); // pull the first email
-
+                                        user.google.email = email; // pull the first email
+                                        user.jira.id = email.split("@")[0];
+                                        req.cookies.jiraUserId = user.jira.id;
+                                        req.res.cookie('jiraUserId', user.jira.id);
                                         user.save(function (err) {
                                             if (err) {
                                                 return done(err);
@@ -86,8 +89,11 @@ module.exports = function (passport) {
                                     newUser.google.id = profile.id;
                                     newUser.google.token = tokens.token;
                                     newUser.google.name = profile.displayName;
-                                    newUser.google.email = (profile.emails[0].value || '').toLowerCase(); // pull the first email
-
+                                    newUser.google.email = email; // pull the first email
+                                    newUser.jira = {};
+                                    newUser.jira.id = email.split("@")[0];
+                                    req.cookies.jiraUserId = newUser.jira.id;
+                                    req.res.cookie('jiraUserId', newUser.jira.id);
                                     newUser.save(function (err) {
                                         if (err) {
                                             return done(err);
@@ -101,14 +107,17 @@ module.exports = function (passport) {
                                 return done(null, user);
                             })
                         } else {
+                            let email = (profile.emails[0].value || '').toLowerCase();
                             if (user) {
 
                                 // if there is a user id already but no token (user was linked at one point and then removed)
                                 if (!user.google.token) {
                                     user.google.token = token;
                                     user.google.name = profile.displayName;
-                                    user.google.email = (profile.emails[0].value || '').toLowerCase(); // pull the first email
-
+                                    user.google.email = email; // pull the first email
+                                    user.jira.id = email.split("@")[0];
+                                    req.cookies.jiraUserId = user.jira.id;
+                                    req.res.cookie('jiraUserId', user.jira.id);
                                     user.save(function (err) {
                                         if (err)
                                             return done(err);
@@ -125,8 +134,11 @@ module.exports = function (passport) {
                                 newUser.google.id = profile.id;
                                 newUser.google.token = token;
                                 newUser.google.name = profile.displayName;
-                                newUser.google.email = (profile.emails[0].value || '').toLowerCase(); // pull the first email
-
+                                newUser.google.email = email; // pull the first email
+                                newUser.jira = {};
+                                newUser.jira.id = email.split("@")[0];
+                                req.cookies.jiraUserId = newUser.jira.id;
+                                req.res.cookie('jiraUserId', newUser.jira.id);
                                 newUser.save(function (err) {
                                     if (err)
                                         return done(err);
@@ -143,7 +155,11 @@ module.exports = function (passport) {
 
                     user.google.id = profile.id;
                     user.google.name = profile.displayName;
-                    user.google.email = (profile.emails[0].value || '').toLowerCase(); // pull the first email
+                    let email = (profile.emails[0].value || '').toLowerCase();
+                    user.google.email = email; // pull the first email
+                    user.jira.id = email.split("@")[0];
+                    req.cookies.jiraUserId = user.jira.id;
+                    req.res.cookie('jiraUserId', user.jira.id);
 
                     if (req.cookies.google_auth_renew_token) {
                         googleTools.requestForCredentials(req, function (tokens) {

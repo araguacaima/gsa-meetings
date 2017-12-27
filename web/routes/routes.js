@@ -6,6 +6,8 @@ const dateFormatRFC3339 = require('../../config/settings').dateFormatRFC3339;
 const timezone = require('../../config/settings').timezone;
 const showableDateFormat = require('../../config/settings').showableDateFormat;
 const jiraControllers = require('../controllers/jiraControllers');
+const base64 = require('base-64');
+const User = require('../../app/models/user');
 
 module.exports = function (router, passport) {
 
@@ -115,15 +117,78 @@ module.exports = function (router, passport) {
     });
 
     router.post('/jira/ticket', ensureAuthenticated, jiraControllers.createTicket, function (req, res) {
-        jira.create(req, function (messages) {
+        jira.getIssue(req, function (messages) {
             res.render('index', {
                 title: 'GSA Tools',
                 config: auth,
                 authorised: req.isAuthenticated(),
                 messages: messages
             });
-        });
+        }, res.redirect('/login/jira'));
     });
+
+
+    router.get('/login/jira',
+        function (req, res) {
+            res.render('login-local', {
+                title: 'GSA | Jira Authentication'
+            })
+        });
+
+    router.post('/login/jira',
+        function (req, res) {
+            console.log(req.body);
+            const jiraToken = base64.encode(req.body.username + ":" + req.body.password);
+            const jiraUserId = req.cookies.jiraUserId;
+            User.findOne({'jira.id': jiraUserId}, function (err, user) {
+                user.jira.token = jiraToken;
+                user.save(
+                    function (err) {
+                        if (!err) {
+                            res.render('index', {
+                                title: 'GSA Tools',
+                                config: auth,
+                                authorised: req.isAuthenticated()
+                            });
+                        } else {
+                            res.redirect('/login/jira');
+                        }
+                    }
+                );
+            });
+        });
+
+    // the callback after google has authenticated the user
+
+    router.get('/auth/jira/callback',
+        function (res, req) {
+            let oa = new OAuth(req.session.oa._requestUrl,
+                req.session.oa._accessUrl,
+                req.session.oa._consumerKey,
+                fs.readFileSync("./jira.pem", "utf8"),
+                req.session.oa._version,
+                req.session.oa._authorize_callback,
+                req.session.oa._signatureMethod);
+            oa.getOAuthAccessToken(
+                req.session.oauth_token,
+                req.session.oauth_token_secret,
+                req.param("oauth_verifier"),
+                function (error, oauth_access_token, oauth_access_token_secret, results2) {
+                    if (error) {
+                        console.log("error");
+                        console.log(error);
+                    } else {
+// store the access token in the session
+                        req.session.oauth_access_token = oauth_access_token;
+                        req.session.oauth_access_token_secret = oauth_access_token_secret;
+                        res.send({
+                            message: "successfully authenticated.",
+                            access_token: oauth_access_token,
+                            secret: oauth_access_token_secret
+                        });
+                    }
+                });
+        });
 };
 
 // Simple route middleware to ensure user is authenticated.
