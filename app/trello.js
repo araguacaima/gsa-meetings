@@ -38,7 +38,7 @@ module.exports.getUserTrelloBoards = function (res) {
                 credentials.secret,
                 function (err, data, response) {
                     if (!err) {
-                        resolve({boards: data});
+                        resolve({boards: JSON.parse(data)});
                     } else {
                         if (err && data === 'invalid token') {
                             err.renewTokens = {};
@@ -52,41 +52,73 @@ module.exports.getUserTrelloBoards = function (res) {
     });
 };
 
-module.exports.getBoardLists = function (boardIdAndTokenInfo) {
-
+module.exports.getBoardLists = function (boardIdAndCredentials, res) {
     return new Promise(function (resolve, reject) {
-        trelloTools.getOAuthClient().get(
-            /*api to gets lists in a given board of a particular user:
-            https://api.trello.com/1/boards/<boardId>/lists */
-            `${uri}/1/boards/${boardIdAndTokenInfo.boardId}/lists`,
-            boardIdAndTokenInfo.tokenInfo.accToken,
-            boardIdAndTokenInfo.tokenInfo.accTokenSecret,
-            function (err, data, response) {
-                if (!err) {
-                    resolve(data);
-                } else {
-                    reject({'error': err});
-                }
+        trelloTools.getCredentials(res).then((credentials) => {
+            if (credentials.isNew) {
+                res.req.session.redirectUrl = res.req.url;
+                trelloTools.authorize(res, credentials.token, '/trello/lists')
+            } else {
+                resolve(credentials, res.req.cookies.trelloUserId);
             }
-        );
+        });
+    }).then(function (credentials, userId) {
+        boardIdAndCredentials.credentials = credentials;
+        return new Promise(function (resolve, reject) {
+            trelloTools.getOAuthClient().get(
+                /*api to gets lists in a given board of a particular user:
+                https://api.trello.com/1/boards/<boardId>/lists */
+                `${uri}/1/boards/${boardIdAndCredentials.boardId}/lists`,
+                boardIdAndCredentials.credentials.token,
+                boardIdAndCredentials.credentials.secret,
+                function (err, data, response) {
+                    if (!err) {
+                        resolve({lists: JSON.parse(data)});
+                    } else {
+                        if (err && data === 'invalid token') {
+                            err.renewTokens = {};
+                            err.renewTokens.trello = true;
+                            trelloTools.deleteCredentials(userId);
+                        }
+                        reject(err);
+                    }
+                }
+            );
+        })
     });
 };
 
-module.exports.getCardsOnList = function (boardListAndTokenInfo) {
-
+module.exports.getCardsOnList = function (listIsAndCredentials, res) {
     return new Promise(function (resolve, reject) {
-        trelloTools.getOAuthClient().get(
-            /*api to gets cards in a given list, in a given board of a particular user: https://api.trello.com/1/lists/<listId>/cards */
-            `${uri}/1/lists/${boardListAndTokenInfo.listId}/cards`,
-            boardListAndTokenInfo.tokenInfo.accToken,
-            boardListAndTokenInfo.tokenInfo.accTokenSecret,
-            function (err, data, response) {
-                if (!err) {
-                    resolve(data);
-                } else {
-                    reject({'error': err});
-                }
+        trelloTools.getCredentials(res).then((credentials) => {
+            if (credentials.isNew) {
+                res.req.session.redirectUrl = res.req.url;
+                trelloTools.authorize(res, credentials.token, '/trello/lists')
+            } else {
+                resolve(credentials, res.req.cookies.trelloUserId);
             }
-        );
+        });
+    }).then(function (credentials, userId) {
+        listIsAndCredentials.credentials = credentials;
+        return new Promise(function (resolve, reject) {
+            trelloTools.getOAuthClient().get(
+                /*api to gets cards in a given list, in a given board of a particular user: https://api.trello.com/1/lists/<listId>/cards */
+                `${uri}/1/lists/${listIsAndCredentials.listId}/cards`,
+                listIsAndCredentials.credentials.token,
+                listIsAndCredentials.credentials.secret,
+                function (err, data, response) {
+                    if (!err) {
+                        resolve({cards: JSON.parse(data)});
+                    } else {
+                        if (err && data === 'invalid token') {
+                            err.renewTokens = {};
+                            err.renewTokens.trello = true;
+                            trelloTools.deleteCredentials(userId);
+                        }
+                        reject(err);
+                    }
+                }
+            );
+        })
     });
 };

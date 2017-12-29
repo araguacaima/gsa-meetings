@@ -11,34 +11,34 @@ block scripts
       trelloLists.click(function (e) {
         const target = $(e.currentTarget);
         const previuosHref = target.attr('href');
-        const $input = $('input:checked[name=boards]');
-        let boardId;
+        const $input = $('input:checked[name=lists]');
+        let listId;
         $input.each(function () {
           var $this = $(this);
           if ($this.is(":checked")) {
-              boardId = $this.attr("id");
+              listId = $this.attr("id");
           }
         });
-        const href = previuosHref + "?" + "boardId=" + boardId;
+        const href = previuosHref + "?listId=" + listId;
         target.attr('href', href);
       });
     });
 block content
-  h1 Pick up your trello boards.
+  h1 Pick up your trello cards.
   br
   .container
     section.css-table
       section.two-column
         section.cell
-          each board in boards
+          each list in lists
             section.css-table
               section
                 section.cell
                   .text
-                    input(type='radio', name='boards', id= board.id, value= board.id)
+                    input(type='radio', name='lists', id= list.id, value= list.id)
                     | &nbsp;
-                    h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px")= board.name
+                    h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px")= list.name
   .text-center(style="margin: 30px;")
-    a.btn.btn-danger(href='/trello/lists' id='trello-lists')
+    a.btn.btn-danger(href='/trello/lists/cards' id='trello-lists')
       span.fa.fa-trello
-      |&nbsp;Get Lists
+      |&nbsp;Get Cards

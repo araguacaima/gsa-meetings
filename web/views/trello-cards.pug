@@ -1,0 +1,22 @@
+extends layout
+
+block title
+  title= title
+
+block content
+  h1 Pick up your trello cards.
+  br
+  .container
+    section.css-table
+      section.two-column
+        section.cell
+          each card in cards
+            section.css-table
+              section
+                section.cell
+                  .text
+                    h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px")= card.name
+  .text-center(style="margin: 30px;")
+    a.btn.btn-danger(href='/jira/ticket' id='trello-cards')
+      span.fa.fa-jira
+      |&nbsp;Push to Jira

@@ -76,6 +76,52 @@ module.exports = function (router, passport) {
     });
 
     // show the home page (will also have our login links)
+    router.get('/trello/lists', ensureAuthenticated, function (req, res) {
+        let boardIdAndCredentials = {};
+        boardIdAndCredentials.boardId = req.query.boardId;
+        trello.getBoardLists(boardIdAndCredentials, res).then(function (result) {
+            if (!result.error) {
+                res.render('trello-lists', {
+                    title: 'GSA | Trello Lists',
+                    lists: result.lists,
+                    authorised: req.isAuthenticated()
+                });
+            } else {
+                res.redirect('/login/trello');
+            }
+        }).catch((err) => {
+            if (err && err.renewTokens.trello) {
+                res.redirect('/trello')
+            } else {
+                res.redirect('/login/trello')
+            }
+        })
+    });
+
+    // show the home page (will also have our login links)
+    router.get('/trello/lists/cards', ensureAuthenticated, function (req, res) {
+        let listIsAndCredentials = {};
+        listIsAndCredentials.listId = req.query.listId;
+        trello.getCardsOnList(listIsAndCredentials, res).then(function (result) {
+            if (!result.error) {
+                res.render('trello-cards', {
+                    title: 'GSA | Trello Cards',
+                    cards: result.cards,
+                    authorised: req.isAuthenticated()
+                });
+            } else {
+                res.redirect('/login/trello');
+            }
+        }).catch((err) => {
+            if (err && err.renewTokens.trello) {
+                res.redirect('/trello')
+            } else {
+                res.redirect('/login/trello')
+            }
+        })
+    });
+
+    // show the home page (will also have our login links)
     router.get('/picker', ensureAuthenticated, function (req, res) {
         res.render('picker', {
             title: 'GSA | Picker',
