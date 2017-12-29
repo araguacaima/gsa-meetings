@@ -72,12 +72,17 @@ module.exports = function (passport) {
                                         user.jira.id = email.split("@")[0];
                                         req.cookies.jiraUserId = user.jira.id;
                                         req.res.cookie('jiraUserId', user.jira.id);
+
+                                        user.trello.id = email.split("@")[0];
+                                        req.cookies.trelloUserId = user.trello.id;
+                                        req.res.cookie('trelloUserId', user.trello.id);
+                                        
                                         user.save(function (err) {
                                             if (err) {
                                                 return done(err);
                                             }
-                                            req.res.clearCookie("google_auth_renew_token");
-                                            req.res.clearCookie("google_auth_code");
+                                            // req.res.clearCookie("google_auth_renew_token");
+                                            // req.res.clearCookie("google_auth_code");
                                             return done(null, user);
                                         });
                                     }
@@ -94,6 +99,11 @@ module.exports = function (passport) {
                                     newUser.jira.id = email.split("@")[0];
                                     req.cookies.jiraUserId = newUser.jira.id;
                                     req.res.cookie('jiraUserId', newUser.jira.id);
+
+                                    newUser.trello.id = email.split("@")[0];
+                                    req.cookies.trelloUserId = newUser.trello.id;
+                                    req.res.cookie('trelloUserId', newUser.trello.id);
+
                                     newUser.save(function (err) {
                                         if (err) {
                                             return done(err);
@@ -118,6 +128,11 @@ module.exports = function (passport) {
                                     user.jira.id = email.split("@")[0];
                                     req.cookies.jiraUserId = user.jira.id;
                                     req.res.cookie('jiraUserId', user.jira.id);
+
+                                    user.trello.id = email.split("@")[0];
+                                    req.cookies.trelloUserId = user.trello.id;
+                                    req.res.cookie('trelloUserId', user.trello.id);
+
                                     user.save(function (err) {
                                         if (err)
                                             return done(err);
@@ -139,6 +154,11 @@ module.exports = function (passport) {
                                 newUser.jira.id = email.split("@")[0];
                                 req.cookies.jiraUserId = newUser.jira.id;
                                 req.res.cookie('jiraUserId', newUser.jira.id);
+
+                                newUser.trello.id = email.split("@")[0];
+                                req.cookies.trelloUserId = newUser.trello.id;
+                                req.res.cookie('trelloUserId', newUser.trello.id);
+
                                 newUser.save(function (err) {
                                     if (err)
                                         return done(err);
@@ -160,6 +180,10 @@ module.exports = function (passport) {
                     user.jira.id = email.split("@")[0];
                     req.cookies.jiraUserId = user.jira.id;
                     req.res.cookie('jiraUserId', user.jira.id);
+
+                    user.trello.id = email.split("@")[0];
+                    req.cookies.trelloUserId = user.trello.id;
+                    req.res.cookie('trelloUserId', user.trello.id);
 
                     if (req.cookies.google_auth_renew_token) {
                         googleTools.requestForCredentials(req, function (tokens) {

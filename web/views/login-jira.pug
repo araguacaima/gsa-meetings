@@ -1,22 +1,28 @@
-extends layout
-
 doctype html
-html
+html(xmlns='http://www.w3.org/1999/xhtml')
   head
+    meta(http-equiv='content-type', content='text/html; charset=utf-8')
     title= title
     link(rel='stylesheet', href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
     link(rel='stylesheet', href='//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css')
     style body { padding-top:80px; }
   body
+
+    if messages
+      section.css-table
+        section.cell
+        for message in messages
+          section.css-table
+            section.cell(style="display: table")
+              .text-danger
+                h4!= message
+
     .container
       .col-sm-6.col-sm-offset-3
-        h1
-          span.fa.fa-sign-in
-          | Login
-        |  <% if (message.length > 0) { %> 
-        .alert.alert-danger <%= message %>
-        |  <% } %> 
-        // LOGIN FORM 
+        h1.text-info
+          span.fa.fa-jira
+          | &nbsp;
+          | Login on Jira
         form(action='/login/jira', method='post')
           .form-group
             label Username
@@ -27,6 +33,6 @@ html
           button.btn.btn-warning.btn-lg(type='submit') Login
         hr
         p
-          | Go
+          | Go&nbsp;
           a(href='/') home
           | .

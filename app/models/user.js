@@ -31,6 +31,10 @@ const userSchema = mongoose.Schema({
     jira: {
         id: String,
         token: String
+    },
+    trello: {
+        id: String,
+        token: String
     }
 
 });

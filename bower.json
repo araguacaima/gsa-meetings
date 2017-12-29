@@ -1,12 +1,12 @@
 {
-  "name": "gsa-meetings",
+  "name": "gsa-tools",
   "description": "",
   "main": "server.js",
   "authors": [
     "Alex <alejandromanuel.mendez.aragua@bbva.com>"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/araguacaima/gsa-meetings",
+  "homepage": "https://github.com/araguacaima/gsa-tools",
   "ignore": [
     "**/.*",
     "node_modules",

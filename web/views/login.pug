@@ -1,17 +1,18 @@
 doctype html
-html
-    head
-        title= title
-        link(rel='stylesheet', href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
-        link(rel='stylesheet', href='//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css')
-    body(style={'padding-top': '80px'})
-        .container
-            .jumbotron.text-center
-                img(src='/images/gsa-logo-medium.png')
-                h1
-                    span.fa.fa-lock
-                    | GSA Authentication
-                p Login with:&nbsp;
-                    a.btn.btn-danger(href='/auth/google')
-                        span.fa.fa-google-plus
-                        |  Google+
+html(xmlns='http://www.w3.org/1999/xhtml')
+  head
+    meta(http-equiv='content-type', content='text/html; charset=utf-8')
+    title= title
+    link(rel='stylesheet', href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
+    link(rel='stylesheet', href='//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css')
+  body(style={'padding-top': '80px'})
+    .container
+      .jumbotron.text-center
+        img(src='/images/gsa-logo-medium.png')
+        h1
+          span.fa.fa-lock
+          | GSA Authentication
+        p Login with:&nbsp;
+          a.btn.btn-danger(href='/auth/google')
+            span.fa.fa-google-plus
+            |&nbsp;Google+
