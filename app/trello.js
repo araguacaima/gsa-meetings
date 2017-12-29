@@ -38,7 +38,7 @@ module.exports.getUserTrelloBoards = function (res) {
                 credentials.secret,
                 function (err, data, response) {
                     if (!err) {
-                        resolve(data);
+                        resolve({boards: data});
                     } else {
                         if (err && data === 'invalid token') {
                             err.renewTokens = {};
