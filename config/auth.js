@@ -58,7 +58,7 @@ module.exports = {
         request_token_uri: "https://trello.com/1/OAuthGetRequestToken",
         access_token_uri: "https://trello.com/1/OAuthGetAccessToken",
         authorize_uri: "https://trello.com/1/OAuthAuthorizeToken",
-        app_name: "Trello OAuth Example",
+        app_name: "GSA-Tools",
         redirect_uri: "http://localhost:8080/auth/trello/callback",
         key: "252a684bbe907946a0f0d699309c78a3",
         secret: "af376e7b186a0e65b3d3cf859e47fa822d2ab35fc6a1ba3a701ee9aced78b00a"

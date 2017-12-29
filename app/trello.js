@@ -24,12 +24,13 @@ module.exports.getUserTrelloBoards = function (res) {
     return new Promise(function (resolve, reject) {
         trelloTools.getCredentials(res).then((credentials) => {
             if (credentials.isNew) {
+                res.req.session.redirectUrl = res.req.url;
                 trelloTools.authorize(res, credentials.token, '/trello')
             } else {
-                resolve(credentials);
+                resolve(credentials, res.req.cookies.trelloUserId);
             }
         });
-    }).then(function (credentials) {
+    }).then(function (credentials, userId) {
         return new Promise(function (resolve, reject) {
             trelloTools.getOAuthClient().get(
                 `${uri}/1/members/me/boards`,
@@ -42,6 +43,7 @@ module.exports.getUserTrelloBoards = function (res) {
                         if (err && data === 'invalid token') {
                             err.renewTokens = {};
                             err.renewTokens.trello = true;
+                            trelloTools.deleteCredentials(userId);
                         }
                         reject(err);
                     }

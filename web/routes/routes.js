@@ -66,8 +66,13 @@ module.exports = function (router, passport) {
             } else {
                 res.redirect('/login/trello');
             }
-        }).catch((err) =>
-            res.redirect('/login/trello'))
+        }).catch((err) => {
+            if (err && err.renewTokens.trello) {
+                res.redirect('/trello')
+            } else {
+                res.redirect('/login/trello')
+            }
+        })
     });
 
     // show the home page (will also have our login links)
@@ -207,25 +212,30 @@ module.exports = function (router, passport) {
                 );
             });
         });
-    // the callback after trello has authenticated the user
 
+    // the callback after trello has authenticated the user
     router.get('/auth/trello/callback',
         function (req, res) {
 
             const query = url.parse(req.url, true).query;
             const token = query.oauth_token;
             const verifier = query.oauth_verifier;
-            const tokens = trelloTools.getCredentials();
             const oAuthClient = trelloTools.getOAuthClient();
+            trelloTools.getCredentials().then(
+                (credentials) => {
+                    new Promise(function (resolve, reject) {
+                        oAuthClient.getOAuthAccessToken(token, credentials.secret, verifier, function (error, accessToken, accessTokenSecret, results) {
+                            // In a real app, the accessToken and accessTokenSecret should be stored
+                            console.log(`in getOAuthAccessToken - accessToken: ${accessToken}, accessTokenSecret: ${accessTokenSecret}, error: ${error}`);
+                            let tokens = {};
+                            tokens.token = accessToken;
+                            tokens.secret = accessTokenSecret;
+                            trelloTools.storeTokens(tokens);
+                            resolve();
+                        });
+                    }).then(() => res.redirect(req.session.redirectUrl))
+                });
 
-            oAuthClient.getOAuthAccessToken(token, tokens.secret, verifier, function (error, accessToken, accessTokenSecret, results) {
-                // In a real app, the accessToken and accessTokenSecret should be stored
-                console.log(`in getOAuthAccessToken - accessToken: ${accessToken}, accessTokenSecret: ${accessTokenSecret}, error: ${error}`);
-                let tokens = {};
-                tokens.token = accessToken;
-                tokens.secret = accessTokenSecret;
-                trelloTools.storeTokens(tokens);
-            });
         });
 };
 

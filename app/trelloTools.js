@@ -66,8 +66,8 @@ function deleteCredentials(userId) {
     }
     User.findOne({'trello.id': userId}, function (err, user) {
         if (!err) {
-            user.google.token = undefined;
-            user.google.reset = false;
+            user.trello.token = undefined;
+            user.trello.reset = false;
             user.save(function (err) {
                 if (err) {
                     throw new Error(err);
@@ -154,5 +154,6 @@ module.exports = {
     "checkForCredentials": checkForCredentials,
     "getAccessToken": getAccessToken,
     "getOAuthAccessToken": getOAuthAccessToken,
-    "getRequestToken": getRequestToken
+    "getRequestToken": getRequestToken,
+    "deleteCredentials": deleteCredentials
 };
