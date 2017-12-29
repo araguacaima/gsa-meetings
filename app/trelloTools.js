@@ -1,4 +1,5 @@
 const OAuth = require('oauth').OAuth;
+const settings = require('../config/settings');
 const auth = require('../config/auth').trelloAuth;
 const HOME_DIR = require('os').homedir();
 const TOKEN_DIR = HOME_DIR + '/.credentials';
@@ -18,6 +19,7 @@ function requestForCredentials() {
                 tokens.token = token;
                 tokens.secret = tokenSecret;
                 storeTokens(tokens);
+                tokens.isNew = true;
                 resolve(tokens);
             } else {
                 reject(err);
@@ -42,13 +44,13 @@ function getCredentials(res) {
                 return new Promise(function (resolve, reject) {
                     deleteCredentials(res.req.cookies.trelloUserId);
                     resolve();
-                }).then(() => requestForCredentials()).resolve();
+                }).then(() => requestForCredentials().then((credentials) => resolve(credentials))).resolve();
             } else {
                 resolve(JSON.parse(json));
             }
         } catch (ex) {
             if (ex.code === 'ENOENT') {
-                resolve(requestForCredentials());
+                requestForCredentials().then((credentials) => resolve(credentials));
             } else {
                 reject(ex);
             }
@@ -101,8 +103,8 @@ function storeTokens(tokens, callback) {
     }
 }
 
-function authorize(res, token) {
-    res.redirect(auth.authorize_uri + `?oauth_token=${token}&name=GSA-Tools`);
+function authorize(res, token, redirect) {
+    res.redirect(auth.authorize_uri + `?oauth_token=${token}&name=${settings.appName}&return_url=${redirect}`);
 }
 
 function getOAuthAccessToken(token, tokenSecret, verifier) {

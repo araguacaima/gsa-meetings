@@ -210,7 +210,7 @@ module.exports = function (router, passport) {
     // the callback after trello has authenticated the user
 
     router.get('/auth/trello/callback',
-        function (res, req) {
+        function (req, res) {
 
             const query = url.parse(req.url, true).query;
             const token = query.oauth_token;

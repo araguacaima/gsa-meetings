@@ -22,7 +22,13 @@ module.exports.getUserInfo = function (tokenkeyPair) {
 
 module.exports.getUserTrelloBoards = function (res) {
     return new Promise(function (resolve, reject) {
-        trelloTools.getCredentials(res).then((credentials) => resolve(credentials));
+        trelloTools.getCredentials(res).then((credentials) => {
+            if (credentials.isNew) {
+                trelloTools.authorize(res, credentials.token, '/trello')
+            } else {
+                resolve(credentials);
+            }
+        });
     }).then(function (credentials) {
         return new Promise(function (resolve, reject) {
             trelloTools.getOAuthClient().get(

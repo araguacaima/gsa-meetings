@@ -1,4 +1,5 @@
 module.exports.timezone = 'UTC-06:00';
+module.exports.appName = 'GSA-Tools';
 module.exports.dateFormatRFC3339 = 'YYYY-MM-DDTHH:mm:ssZ';
 module.exports.showableDateFormat = 'ddd DD MMM YYYY';
 module.exports.calendarListParams = {
