@@ -60,8 +60,8 @@ block content
         section.cell
           each val in calendarIds
             section.css-table
-              section.two-column(style="display: inline-block")
-                section.cell
+              section.two-column(style="display: -webkit-box;")
+                section.cell(style="display: inline-block;")
                   .text
                     input(type='checkbox', name='calendars', id= val, value= val)
                 section.cell(style="color: #555555")

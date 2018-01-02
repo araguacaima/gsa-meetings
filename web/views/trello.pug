@@ -28,16 +28,16 @@ block content
   br
   .container
     section.css-table
-      section.two-column
-        section.cell
-          each board in boards
-            section.css-table
-              section
-                section.cell
-                  .text
-                    input(type='radio', name='boards', id= board.id, value= board.id)
-                    | &nbsp;
-                    h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px")= board.name
+      section.cell
+        each board in boards
+          section.css-table
+            section.two-column(style="display: -webkit-box;")
+              section.cell(style="display: inline-block;")
+                .text
+                  input(type='radio', name='boards', id= board.id, value= board.id)
+              section.cell(style="color: #555555")
+                .text
+                  h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px")= board.name
   .text-center(style="margin: 30px;")
     a.btn.btn-danger(href='/trello/lists' id='trello-lists')
       span.fa.fa-trello
