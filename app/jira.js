@@ -4,12 +4,12 @@ const issuesAPIUri = "/rest/api/2/issue/{id}";
 const createmetaAPIUri = "/rest/api/2/issue/createmeta";
 const methodGet = "GET";
 
-module.exports.createIssue = function(jiraUserId, callback) {
+module.exports.createIssue = function (jiraUserId, callback) {
     const messages = [];
     callback(messages);
 };
 
-module.exports.getIssue = function(jiraUserId, callback, errCallback) {
+module.exports.getIssue = function (jiraUserId, callback, errCallback) {
     const messages = [];
     let args = {
         data: {},
@@ -31,16 +31,17 @@ module.exports.getIssue = function(jiraUserId, callback, errCallback) {
 };
 
 
-module.exports.getCreatemeta = function(jiraUserId) {
+module.exports.getCreatemeta = function (jiraUserId) {
     return new Promise(function (resolve, reject) {
-        jiraTools.getCredentials(jiraUserId).then((credentials) => resolve(credentials)).catch(reject);
+        jiraTools.getCredentials(jiraUserId)
+            .then((credentials) => resolve(credentials))
+            .catch(reject);
     }).then(function (credentials) {
         const url = auth.base_url + createmetaAPIUri;
-        return new Promise(function (resolve, reject) {
-            jiraTools.invoke(credentials.token, methodGet, url);
-            return resolve();
-        }).then(() => {
-            console.log("pasó");
-        });
+        return jiraTools.invoke(credentials.token, methodGet, url)
+    }).then((data) => {
+        console.log(data);
+        return data;
     });
+
 };

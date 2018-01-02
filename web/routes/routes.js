@@ -104,8 +104,7 @@ module.exports = function (router, passport) {
         let listInfoAndCredentials = {};
         listInfoAndCredentials.listId = req.params.listId;
         listInfoAndCredentials.listName = req.query.listName;
-        let createmeta = jira.getCreatemeta(req.cookies.jiraUserId);
-        createmeta.then((jiraMeta) => {
+        jira.getCreatemeta(req.cookies.jiraUserId).then((jiraMeta) => {
             trello.getCardsOnList(listInfoAndCredentials, res).then(function (result) {
                 if (!result.error) {
                     res.render('trello-cards', {

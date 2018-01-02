@@ -18,9 +18,10 @@ function invoke(token, method, url, args) {
         // registering remote methods
         restClient.methods.callback(args, function (data, response) {
             // parsed response body as js object
-            console.log(data);
             resolve(data);
         });
+    }).then((data) => {
+        return data;
     });
 }
 
