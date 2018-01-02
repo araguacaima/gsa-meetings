@@ -108,7 +108,13 @@ module.exports.getCardsOnList = function (listIsAndCredentials, res) {
                 listIsAndCredentials.credentials.secret,
                 function (err, data, response) {
                     if (!err) {
-                        resolve({cards: JSON.parse(data)});
+                        let result = {cards: JSON.parse(data)};
+                        if (listIsAndCredentials.listName === 'Done') {
+                            result.processSeveral = true;
+                        } else if (listIsAndCredentials.listName === 'Meetings') {
+                            result.areMeetings = true;
+                        }
+                        resolve(result);
                     } else {
                         if (err && data === 'invalid token') {
                             err.renewTokens = {};

@@ -100,13 +100,16 @@ module.exports = function (router, passport) {
 
     // show the home page (will also have our login links)
     router.get('/trello/lists/cards', ensureAuthenticated, function (req, res) {
-        let listIsAndCredentials = {};
-        listIsAndCredentials.listId = req.query.listId;
-        trello.getCardsOnList(listIsAndCredentials, res).then(function (result) {
+        let listInfoAndCredentials = {};
+        listInfoAndCredentials.listId = req.query.listId;
+        listInfoAndCredentials.listName = req.query.listName;
+        trello.getCardsOnList(listInfoAndCredentials, res).then(function (result) {
             if (!result.error) {
                 res.render('trello-cards', {
                     title: 'GSA | Trello Cards',
                     cards: result.cards,
+                    processSeveral: result.processSeveral,
+                    areMeetings: result.areMeetings,
                     authorised: req.isAuthenticated()
                 });
             } else {

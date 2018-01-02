@@ -1,22 +1,46 @@
 extends layout
 
 block title
-  title= title
-
+    title= title
+block scripts
+    script(type='text/javascript', src='/javascripts/jquery-3.2.1.js')
+    link(rel='stylesheet', href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
+    script.
+        $(function () {
+            var cards = $("*[id$='_text']")
+            cards.hover(function (e) {
+                const target = $(e.currentTarget);
+                const id = target.attr("id").replace("_text", "_info");
+                $("#" + id).show();
+            });
+        });
 block content
-  h1 Pick up your trello cards.
-  br
-  .container
-    section.css-table
-      section.two-column
-        section.cell
-          each card in cards
+    h1 Pick up your trello cards.
+    br
+    form(action='/jira/ticket', method='post')
+        .container
             section.css-table
-              section
                 section.cell
-                  .text
-                    h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px")= card.name
-  .text-center(style="margin: 30px;")
-    a.btn.btn-danger(href='/jira/ticket' id='trello-cards')
-      span.fa.fa-jira
-      |&nbsp;Push to Jira
+                    each card in cards
+                        section.css-table
+                            section.two-column(style="display: -webkit-box;")
+                                if processSeveral
+                                    section.cell(style="display: inline-block;")
+                                        .text
+                                            input(type='checkbox', name='cards', id= card.id, value= card.name)
+                                    section.cell
+                                        .text
+                                            h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px")= card.name
+                                unless processSeveral
+                                    section.cell(style="display: block;")
+                                        .text
+                                            h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px", id= card.id + "_text")= card.name
+                                    section.cell
+                                        .text
+                                            - var jsonCard = JSON.stringify(card);
+                                            span(id=card.id + "_info", style="display: none;")= jsonCard
+            if processSeveral
+                .text-center(style="margin: 30px;")
+                    button.btn.btn-danger.btn-lg(type='submit')
+                        span.icon-size-small.icon-jira-alt
+                        | &nbsp;Push to Jira
