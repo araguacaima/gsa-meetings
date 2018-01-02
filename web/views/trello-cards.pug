@@ -8,17 +8,19 @@ block scripts
     link(rel='stylesheet', href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
     script.
         var cardsArray = JSON.parse('!{JSON.stringify(cards)}');
+        var jiraMetaData = JSON.parse('!{JSON.stringify(jiraMeta)}');
         $(function () {
             var cards = $("*[id$='_text']")
             cards.hover(function (e) {
                 const target = $(e.currentTarget);
                 const id = target.attr("id").replace("_text", "");
                 var cardInfo = $.grep(cardsArray, function(e){ return e.id === id; });
-                $("#_info").text(JSON.stringify(cardInfo[0], null, 2));
+                $("#_info").text("Trello Info\n" + JSON.stringify(cardInfo[0], null, 2));
+                $("#_meta_issueTypes").text("\n\nJira Metadata\n" + JSON.stringify(jiraMetaData.issuetypes, null, 2));
                 $("#info").show();
             });
             cards.mouseout(function (e) {
-                //$("#info").hide();
+
             });
             $('#_info').beautifyJSON({
                 type: "plain",
@@ -53,6 +55,8 @@ block content
                         section.cell(style="display: none;", id="info")
                             .text
                                 span(id="_info")
+                            .text
+                                span(id="_meta_issueTypes")
                             .text-center(style="margin: 30px;")
                                 button.btn.btn-danger.btn-lg(type='submit')
                                     span.icon-size-small.icon-jira-alt

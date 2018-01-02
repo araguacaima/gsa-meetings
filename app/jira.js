@@ -3,6 +3,13 @@ const auth = require('../config/auth').jiraAuth;
 const issuesAPIUri = "/rest/api/2/issue/{id}";
 const createmetaAPIUri = "/rest/api/2/issue/createmeta";
 const methodGet = "GET";
+const createmetaParams = {
+    parameters: {
+        expand: "projects.issuetypes.fields",
+        projectKeys: "SA"},
+    headers: {"Accept": "application/json", "Content-Type": "application/json"}
+};
+
 
 module.exports.createIssue = function (jiraUserId, callback) {
     const messages = [];
@@ -38,10 +45,9 @@ module.exports.getCreatemeta = function (jiraUserId) {
             .catch(reject);
     }).then(function (credentials) {
         const url = auth.base_url + createmetaAPIUri;
-        return jiraTools.invoke(credentials.token, methodGet, url)
+        return jiraTools.invoke(credentials.token, methodGet, url, createmetaParams)
     }).then((data) => {
-        console.log(data);
-        return data;
+        return data.projects[0];
     });
 
 };

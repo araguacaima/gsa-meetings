@@ -13,7 +13,7 @@ function invoke(token, method, url, args) {
             args = {};
             args.headers = {};
         }
-        args.headers.Autorization = "Basic " + token;
+        args.headers.Authorization = "Basic " + token;
         restClient.registerMethod("callback", url, method.toUpperCase());
         // registering remote methods
         restClient.methods.callback(args, function (data, response) {
