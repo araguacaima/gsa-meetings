@@ -12,8 +12,8 @@ block scripts
         const target = $(e.currentTarget);
         const previuosHref = target.attr('href');
         const $input = $('input:checked[name=lists]');
-        let listId;
-        let listName;
+        let listId = "";
+        let listName = "";
         $input.each(function () {
           var $this = $(this);
           if ($this.is(":checked")) {
@@ -21,7 +21,7 @@ block scripts
               listName = $this.attr("value");
           }
         });
-        const href = previuosHref + "?listId=" + listId + "&listName=" + listName;
+        const href = previuosHref.replace(":listId", listId); + "?listName=" + listName;
         target.attr('href', href);
       });
     });
@@ -41,6 +41,6 @@ block content
                 .text
                   h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px")= list.name
   .text-center(style="margin: 30px;")
-    a.btn.btn-danger(href='/trello/lists/cards' id='trello-lists')
+    a.btn.btn-danger(href='/trello/lists/:listId/cards' id='trello-lists')
       span.fa.fa-trello
       |&nbsp;Get Cards

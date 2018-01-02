@@ -4,6 +4,7 @@ const trello = require('../../app/trello');
 const jira = require('../../app/jira');
 const googleTools = require('../../app/googleTools');
 const trelloTools = require('../../app/trelloTools');
+const jiraTools = require('../../app/jiraTools');
 const dateFormatRFC3339 = require('../../config/settings').dateFormatRFC3339;
 const timezone = require('../../config/settings').timezone;
 const showableDateFormat = require('../../config/settings').showableDateFormat;
@@ -76,9 +77,9 @@ module.exports = function (router, passport) {
     });
 
     // show the home page (will also have our login links)
-    router.get('/trello/lists', ensureAuthenticated, function (req, res) {
+    router.get('/trello/boards/:boardId/lists', ensureAuthenticated, function (req, res) {
         let boardIdAndCredentials = {};
-        boardIdAndCredentials.boardId = req.query.boardId;
+        boardIdAndCredentials.boardId = req.params.boardId;
         trello.getBoardLists(boardIdAndCredentials, res).then(function (result) {
             if (!result.error) {
                 res.render('trello-lists', {
@@ -99,29 +100,36 @@ module.exports = function (router, passport) {
     });
 
     // show the home page (will also have our login links)
-    router.get('/trello/lists/cards', ensureAuthenticated, function (req, res) {
+    router.get('/trello/lists/:listId/cards', ensureAuthenticated, function (req, res) {
         let listInfoAndCredentials = {};
-        listInfoAndCredentials.listId = req.query.listId;
+        listInfoAndCredentials.listId = req.params.listId;
         listInfoAndCredentials.listName = req.query.listName;
-        trello.getCardsOnList(listInfoAndCredentials, res).then(function (result) {
-            if (!result.error) {
-                res.render('trello-cards', {
-                    title: 'GSA | Trello Cards',
-                    cards: result.cards,
-                    processSeveral: result.processSeveral,
-                    areMeetings: result.areMeetings,
-                    authorised: req.isAuthenticated()
-                });
-            } else {
-                res.redirect('/login/trello');
-            }
+        let createmeta = jira.getCreatemeta(req.cookies.jiraUserId);
+        createmeta.then((jiraMeta) => {
+            trello.getCardsOnList(listInfoAndCredentials, res).then(function (result) {
+                if (!result.error) {
+                    res.render('trello-cards', {
+                        title: 'GSA | Trello Cards',
+                        cards: result.cards,
+                        processSeveral: result.processSeveral,
+                        areMeetings: result.areMeetings,
+                        authorised: req.isAuthenticated(),
+                        jiraMeta: jiraMeta
+                    });
+                } else {
+                    res.redirect('/login/trello');
+                }
+            }).catch((err) => {
+                if (err && err.renewTokens.trello) {
+                    res.redirect('/trello')
+                } else {
+                    res.redirect('/login/trello')
+                }
+            })
         }).catch((err) => {
-            if (err && err.renewTokens.trello) {
-                res.redirect('/trello')
-            } else {
-                res.redirect('/login/trello')
-            }
-        })
+            console.log(err);
+            res.redirect('/login/trello');
+        });
     });
 
     // show the home page (will also have our login links)
@@ -191,7 +199,7 @@ module.exports = function (router, passport) {
     });
 
     router.post('/jira/ticket', ensureAuthenticated, jiraControllers.createTicket, function (req, res) {
-        jira.getIssue(req, function (messages) {
+        jira.getIssue(req.cookies.jiraUserId, function (messages) {
             res.render('index', {
                 title: 'GSA Tools',
                 config: auth,
@@ -223,6 +231,10 @@ module.exports = function (router, passport) {
             const jiraUserId = req.cookies.jiraUserId;
             User.findOne({'jira.id': jiraUserId}, function (err, user) {
                 user.jira.token = jiraToken;
+                let tokens = {};
+                tokens.id = jiraUserId;
+                tokens.token = jiraToken;
+                jiraTools.storeTokens(tokens);
                 user.save(
                     function (err) {
                         if (!err) {

@@ -1,4 +1,4 @@
-/* importing another module: trelloAuth */
+const jira = require('./jira');
 const trelloTools = require('./trelloTools');
 const uri = "https://api.trello.com";
 
@@ -114,6 +114,7 @@ module.exports.getCardsOnList = function (listIsAndCredentials, res) {
                         } else if (listIsAndCredentials.listName === 'Meetings') {
                             result.areMeetings = true;
                         }
+                        resolve.jiraMeta=jira.getCreatemeta();
                         resolve(result);
                     } else {
                         if (err && data === 'invalid token') {

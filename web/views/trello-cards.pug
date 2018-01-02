@@ -4,6 +4,7 @@ block title
     title= title
 block scripts
     script(type='text/javascript', src='/javascripts/jquery-3.2.1.js')
+    script(type='text/javascript', src='/javascripts/jquery.beautify-json.js')
     link(rel='stylesheet', href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
     script.
         var cardsArray = JSON.parse('!{JSON.stringify(cards)}');
@@ -13,12 +14,18 @@ block scripts
                 const target = $(e.currentTarget);
                 const id = target.attr("id").replace("_text", "");
                 var cardInfo = $.grep(cardsArray, function(e){ return e.id === id; });
-                $("#_info").val(JSON.stringify(cardInfo[0]));
+                $("#_info").text(JSON.stringify(cardInfo[0], null, 2));
                 $("#info").show();
             });
             cards.mouseout(function (e) {
-                $("#info").hide();
-            })
+                //$("#info").hide();
+            });
+            $('#_info').beautifyJSON({
+                type: "plain",
+                hoverable: true,
+                collapsible: true,
+                color: true
+            });
         });
 block content
     h1 Pick up your trello cards.
@@ -26,11 +33,11 @@ block content
     form(action='/jira/ticket', method='post')
         .container
             section.css-table
-                section.two-column(style="display: -webkit-box;")
+                section.two-column
                     section.cell
                         each card in cards
                             section.css-table
-                                section.two-column(style="display: -webkit-box;")
+                                section.two-column
                                     if processSeveral
                                         section.cell(style="display: inline-block;")
                                             .text
@@ -42,14 +49,14 @@ block content
                                         section.cell(style="display: block;")
                                             .text
                                                 h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px", id= card.id + "_text")= card.name
-                unless processSeveral
-                    section.cell(style="display: none;", id="info")
-                        .text
-                            span(id="_info")
-                        .text-center(style="margin: 30px;")
-                            button.btn.btn-danger.btn-lg(type='submit')
-                                span.icon-size-small.icon-jira-alt
-                                | &nbsp;Push to Jira
+                    unless processSeveral
+                        section.cell(style="display: none;", id="info")
+                            .text
+                                span(id="_info")
+                            .text-center(style="margin: 30px;")
+                                button.btn.btn-danger.btn-lg(type='submit')
+                                    span.icon-size-small.icon-jira-alt
+                                    | &nbsp;Push to Jira
             if processSeveral
                 .text-center(style="margin: 30px;")
                     button.btn.btn-danger.btn-lg(type='submit')

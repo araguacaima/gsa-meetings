@@ -1,44 +1,44 @@
 extends layout
 
 block title
-  title= title
+    title= title
 block scripts
-  script(type='text/javascript', src='/javascripts/jquery-3.2.1.js')
-  link(rel='stylesheet', href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
-  script.
-    $(function () {
-      var trelloLists = $('#trello-lists');
-      trelloLists.click(function (e) {
-        const target = $(e.currentTarget);
-        const previuosHref = target.attr('href');
-        const $input = $('input:checked[name=boards]');
-        let boardId;
-        $input.each(function () {
-          var $this = $(this);
-          if ($this.is(":checked")) {
-              boardId = $this.attr("id");
-          }
+    script(type='text/javascript', src='/javascripts/jquery-3.2.1.js')
+    link(rel='stylesheet', href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
+    script.
+        $(function () {
+            var trelloLists = $('#trello-lists');
+            trelloLists.click(function (e) {
+                const target = $(e.currentTarget);
+                const previuosHref = target.attr('href');
+                const $input = $('input:checked[name=boards]');
+                let boardId = "";
+                $input.each(function () {
+                    var $this = $(this);
+                    if ($this.is(":checked")) {
+                        boardId = $this.attr("id");
+                    }
+                });
+                const href = previuosHref.replace(":boardId", boardId);
+                target.attr('href', href);
+            });
         });
-        const href = previuosHref + "?" + "boardId=" + boardId;
-        target.attr('href', href);
-      });
-    });
 block content
-  h1 Pick up your trello boards.
-  br
-  .container
-    section.css-table
-      section.cell
-        each board in boards
-          section.css-table
-            section.two-column(style="display: -webkit-box;")
-              section.cell(style="display: inline-block;")
-                .text
-                  input(type='radio', name='boards', id= board.id, value= board.name)
-              section.cell(style="color: #555555")
-                .text
-                  h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px")= board.name
-  .text-center(style="margin: 30px;")
-    a.btn.btn-danger(href='/trello/lists' id='trello-lists')
-      span.fa.fa-trello
-      |&nbsp;Get Lists
+    h1 Pick up your trello boards.
+    br
+    .container
+        section.css-table
+            section.cell
+                each board in boards
+                    section.css-table
+                        section.two-column(style="display: -webkit-box;")
+                            section.cell(style="display: inline-block;")
+                                .text
+                                    input(type='radio', name='boards', id= board.id, value= board.name)
+                            section.cell(style="color: #555555")
+                                .text
+                                    h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px")= board.name
+    .text-center(style="margin: 30px;")
+        a.btn.btn-danger(href='/trello/boards/:boardId/lists' id='trello-lists')
+            span.fa.fa-trello
+            | &nbsp;Get Lists
