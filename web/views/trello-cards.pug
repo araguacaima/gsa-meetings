@@ -4,29 +4,26 @@ block title
     title= title
 block scripts
     script(type='text/javascript', src='/javascripts/jquery-3.2.1.js')
-    script(type='text/javascript', src='/javascripts/jquery.beautify-json.js')
+    script(type='text/javascript', src='/javascripts/jquery-outside-events-plugin.js')
     link(rel='stylesheet', href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
     script.
         var cardsArray = JSON.parse('!{JSON.stringify(cards)}');
         var jiraMetaData = JSON.parse('!{JSON.stringify(jiraMeta)}');
+
         $(function () {
             var cards = $("*[id$='_text']")
-            cards.hover(function (e) {
+            cards.click(function (e) {
                 const target = $(e.currentTarget);
+                target.bind('clickoutside', function (e) {
+                    $("#info").hide();
+                });
                 const id = target.attr("id").replace("_text", "");
-                var cardInfo = $.grep(cardsArray, function(e){ return e.id === id; });
+                var cardInfo = $.grep(cardsArray, function (e) {
+                    return e.id === id;
+                });
                 $("#_info").text("Trello Info\n" + JSON.stringify(cardInfo[0], null, 2));
                 $("#_meta_issueTypes").text("\n\nJira Metadata\n" + JSON.stringify(jiraMetaData.issuetypes, null, 2));
                 $("#info").show();
-            });
-            cards.mouseout(function (e) {
-
-            });
-            $('#_info').beautifyJSON({
-                type: "plain",
-                hoverable: true,
-                collapsible: true,
-                color: true
             });
         });
 block content
@@ -35,7 +32,7 @@ block content
     form(action='/jira/ticket', method='post')
         .container
             section.css-table
-                section.two-column
+                section.three-column
                     section.cell
                         each card in cards
                             section.css-table
@@ -51,16 +48,21 @@ block content
                                         section.cell(style="display: block;")
                                             .text
                                                 h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px", id= card.id + "_text")= card.name
+                    section.cell(id="info")
+                        .text
+                            span(id="_info")
+                        .text
+                            span(id="_meta_issueTypes")
                     unless processSeveral
-                        section.cell(style="display: none;", id="info")
-                            .text
-                                span(id="_info")
-                            .text
-                                span(id="_meta_issueTypes")
-                            .text-center(style="margin: 30px;")
-                                button.btn.btn-danger.btn-lg(type='submit')
-                                    span.icon-size-small.icon-jira-alt
-                                    | &nbsp;Push to Jira
+                        .text-center(style="margin: 30px;")
+                            button.btn.btn-danger.btn-lg(type='submit')
+                                span.icon-size-small.icon-jira-alt
+                                | &nbsp;Push to Jira
+                    section.cell
+                        .text
+                            span(id="_jira")
+
+
             if processSeveral
                 .text-center(style="margin: 30px;")
                     button.btn.btn-danger.btn-lg(type='submit')
