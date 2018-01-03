@@ -10,12 +10,24 @@ block scripts
         var cardsArray = JSON.parse('!{JSON.stringify(cards)}');
         var jiraMetaData = JSON.parse('!{JSON.stringify(jiraMeta)}');
 
+        var whoShowsTrelloInfo = undefined;
         $(function () {
             var cards = $("*[id$='_text']")
             cards.click(function (e) {
                 const target = $(e.currentTarget);
                 target.bind('clickoutside', function (e) {
-                    $("#info").hide();
+                    var target = $(e.target);
+                    var clicked = $(e.currentTarget);
+                    var id = target.attr("id");
+                    if (id === undefined) {
+                        $("#info").hide();
+                        whoShowsTrelloInfo = undefined;
+                    } else {
+                        if (whoShowsTrelloInfo !== id && !id.endsWith("_text")) {
+                            $("#info").hide();
+                            whoShowsTrelloInfo = undefined;
+                        }
+                    }
                 });
                 const id = target.attr("id").replace("_text", "");
                 var cardInfo = $.grep(cardsArray, function (e) {
@@ -23,6 +35,7 @@ block scripts
                 });
                 $("#_info").text("Trello Info\n" + JSON.stringify(cardInfo[0], null, 2));
                 $("#_meta_issueTypes").text("\n\nJira Metadata\n" + JSON.stringify(jiraMetaData.issuetypes, null, 2));
+                whoShowsTrelloInfo = id;
                 $("#info").show();
             });
         });
