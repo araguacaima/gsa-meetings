@@ -5,48 +5,100 @@ block title
 block scripts
     script(type='text/javascript', src='/javascripts/jquery-3.2.1.js')
     script(type='text/javascript', src='/javascripts/jquery-outside-events-plugin.js')
-    link(rel='stylesheet', href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
+    script(type='text/javascript', src='/javascripts/jquery.dd.js')
+    link(rel='stylesheet', type='text/css', href='/stylesheets/dd.css')
+    link(rel='stylesheet', type='text/css', href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
     script.
         var cardsArray = JSON.parse('!{JSON.stringify(cards)}');
-        var jiraMetaData = JSON.parse('!{JSON.stringify(jiraMeta)}');
-
+        var jiraMeta = JSON.parse('!{JSON.stringify(jiraMeta)}');
         var whoShowsTrelloInfo = undefined;
+
+        function isChildOf(element, parentId) {
+            return (element.parents("#" + parentId).length);
+        }
+
         $(function () {
+
+            try {
+                var $issueTypesSelect = $("#issueTypesSelect");
+                $issueTypesSelect.msDropDown();
+
+                jiraMeta.issuetypes.forEach(function (item) {
+                    $issueTypesSelect
+                        .append($('<option />')
+                            .attr("value", item.id)
+                            .attr("data-image", item.iconUrl)
+                            .text(item.name));
+                });
+
+            } catch (e) {
+                alert(e.message);
+            }
+
+
             var cards = $("*[id$='_text']")
             cards.click(function (e) {
-                const target = $(e.currentTarget);
-                target.bind('clickoutside', function (e) {
+
+                var cards = $("*[id$='_text']")
+                cards.each(function (index, element) {
+                    var $element = $(element);
+                    $element.css("background-color", "#FFFFFF");
+                    $element.css("font-weight", "");
+                    var parent = $element.parents("section.css-table")[0];
+                    $(parent).css("background-color", "#FFFFFF");
+                });
+                const currentTarget = $(e.currentTarget);
+                currentTarget.css("background-color", "#F7F7F7");
+                currentTarget.bind('clickoutside', function (e) {
                     var target = $(e.target);
                     var clicked = $(e.currentTarget);
                     var id = target.attr("id");
-                    if (id === undefined) {
+                    if (id !== undefined && (whoShowsTrelloInfo !== id
+                            && !id.endsWith("_text")
+                            && id !== "info"
+                            && !isChildOf(target, "info")
+                            && id !== "meta"
+                            && !isChildOf(target, "meta"))) {
                         $("#info").hide();
                         $("#meta").hide();
+                        $(target).css("background-color", "#FFFFFF");
+                        $(target).css("font-weight", "");
                         whoShowsTrelloInfo = undefined;
-                    } else {
-                        if (whoShowsTrelloInfo !== id && !id.endsWith("_text")) {
-                            $("#info").hide();
-                            $("#meta").hide();
-                            whoShowsTrelloInfo = undefined;
-                        }
                     }
                 });
-                const id = target.attr("id").replace("_text", "");
+                const id = currentTarget.attr("id").replace("_text", "");
                 var cardInfo = $.grep(cardsArray, function (e) {
                     return e.id === id;
                 });
                 var info = cardInfo[0];
-                $("#_info_description").text(info.desc);
+                var comments = undefined;
+                $("#_info_description").html(
+                    (info.desc !== undefined ? "h2. <strong>Descripción:</strong><br>" +
+                        "<br>" +
+                        info.desc + "<br><br>" : "") +
+                    (comments !== undefined ? "h2. <strong>Comentarios:</strong><br>" +
+                        "<br>" +
+                        comments + "<br><br>" : "") +
+                    "h2. <strong>Fecha de compromiso:</strong><br>" +
+                    "<br>" +
+                    info.due + "<br><br>" +
+                    "h2. <strong>Migrado desde:</strong><br>" +
+                    "<br>" +
+                    info.shortUrl + "<br>");
                 var labels = info.labels;
                 var labels_ = [];
-                labels.forEach(function(element) {
-                    labels_.push(element.name);
+                labels.forEach(function (element) {
+                    labels_.push(element.name.replace(/[ /|]/g, "-"));
                 });
                 $("#_info_labels").text(labels_.join());
-                $("#_meta").text("\n\nJira Metadata\n" + JSON.stringify(jiraMetaData.issuetypes, null, 2));
+                //$("#_meta").text("<br><br>Jira Metadata<br>" + JSON.stringify(jiraMeta.issuetypes, null, 2));
                 whoShowsTrelloInfo = id;
                 $("#info").show();
                 $("#meta").show();
+                var parent = currentTarget.parents("section.css-table")[0];
+                $(parent).css("background-color", "#F7F7F7");
+                $(parent).css("width", "100%");
+                currentTarget.css("font-weight", "bold");
             });
         });
 block content
@@ -58,7 +110,7 @@ block content
                 section.three-column
                     section.cell
                         each card in cards
-                            section.css-table
+                            section.css-table(style="width=100%;")
                                 section.two-column
                                     if processSeveral
                                         section.cell(style="display: inline-block;")
@@ -71,34 +123,30 @@ block content
                                         section.cell(style="display: block;")
                                             .text
                                                 h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px", id= card.id + "_text")= card.name
-                    section#info.cell(style="display: none; background-color: #f4f5e4;")
+                    section#info.cell(style="display: none; background-color: #F7F7F7;")
                         section.css-table
                             section.two-column
                                 section.cell(style="vertical-align: middle;")
                                     .text
-                                        h4 Description:
+                                        h4#_info_description_label Description:
                                 section.cell(style="vertical-align: middle;")
                                     .text
                                         div#_info_description
                             section.two-column
                                 section.cell(style="vertical-align: middle;")
                                     .text
-                                        h4 Labels:
+                                        h4#_info_labels_label Labels:
                                 section.cell(style="vertical-align: middle;")
                                     .text
                                         div#_info_labels
-                    section#meta.cell
-                        .text
-                            div#_meta
-                    unless processSeveral
-                        .text-center(style="margin: 30px;")
+                    section#meta.cell(style="display: none;")
+                        div#_meta
+                            select#issueTypesSelect
+                            unless processSeveral
+                                .text-center(style="margin: 30px;")
                             button.btn.btn-danger.btn-lg(type='submit')
                                 span.icon-size-small.icon-jira-alt
                                 | &nbsp;Push to Jira
-                    section.cell
-                        .text
-                            div#_jira
-
 
             if processSeveral
                 .text-center(style="margin: 30px;")

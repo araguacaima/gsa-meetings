@@ -273,3 +273,10 @@ footer {
 footer ul {
   list-style: none;
 }
+
+hr {
+  display: block;
+  color: white;
+  margin: 0.5em auto;
+  border: 1px inset;
+}
