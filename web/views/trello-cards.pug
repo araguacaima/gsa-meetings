@@ -21,10 +21,12 @@ block scripts
                     var id = target.attr("id");
                     if (id === undefined) {
                         $("#info").hide();
+                        $("#meta").hide();
                         whoShowsTrelloInfo = undefined;
                     } else {
                         if (whoShowsTrelloInfo !== id && !id.endsWith("_text")) {
                             $("#info").hide();
+                            $("#meta").hide();
                             whoShowsTrelloInfo = undefined;
                         }
                     }
@@ -33,10 +35,18 @@ block scripts
                 var cardInfo = $.grep(cardsArray, function (e) {
                     return e.id === id;
                 });
-                $("#_info").text("Trello Info\n" + JSON.stringify(cardInfo[0], null, 2));
-                $("#_meta_issueTypes").text("\n\nJira Metadata\n" + JSON.stringify(jiraMetaData.issuetypes, null, 2));
+                var info = cardInfo[0];
+                $("#_info_description").text(info.desc);
+                var labels = info.labels;
+                var labels_ = [];
+                labels.forEach(function(element) {
+                    labels_.push(element.name);
+                });
+                $("#_info_labels").text(labels_.join());
+                $("#_meta").text("\n\nJira Metadata\n" + JSON.stringify(jiraMetaData.issuetypes, null, 2));
                 whoShowsTrelloInfo = id;
                 $("#info").show();
+                $("#meta").show();
             });
         });
 block content
@@ -61,11 +71,25 @@ block content
                                         section.cell(style="display: block;")
                                             .text
                                                 h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px", id= card.id + "_text")= card.name
-                    section.cell(id="info")
+                    section#info.cell(style="display: none; background-color: #f4f5e4;")
+                        section.css-table
+                            section.two-column
+                                section.cell(style="vertical-align: middle;")
+                                    .text
+                                        h4 Description:
+                                section.cell(style="vertical-align: middle;")
+                                    .text
+                                        div#_info_description
+                            section.two-column
+                                section.cell(style="vertical-align: middle;")
+                                    .text
+                                        h4 Labels:
+                                section.cell(style="vertical-align: middle;")
+                                    .text
+                                        div#_info_labels
+                    section#meta.cell
                         .text
-                            span(id="_info")
-                        .text
-                            span(id="_meta_issueTypes")
+                            div#_meta
                     unless processSeveral
                         .text-center(style="margin: 30px;")
                             button.btn.btn-danger.btn-lg(type='submit')
@@ -73,7 +97,7 @@ block content
                                 | &nbsp;Push to Jira
                     section.cell
                         .text
-                            span(id="_jira")
+                            div#_jira
 
 
             if processSeveral
