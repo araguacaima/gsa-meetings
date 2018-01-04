@@ -6,7 +6,8 @@ const methodGet = "GET";
 const createmetaParams = {
     parameters: {
         expand: "projects.issuetypes.fields",
-        projectKeys: "SA"},
+        projectKeys: "SA"
+    },
     headers: {"Accept": "application/json", "Content-Type": "application/json"}
 };
 
@@ -50,4 +51,31 @@ module.exports.getCreatemeta = function (jiraUserId) {
         return data.projects[0];
     });
 
+};
+
+module.exports.createIssueTypesCombo = function (jiraMeta) {
+    const result = [];
+    jiraMeta.issuetypes.forEach(function (item) {
+        result.push({
+            text: item.name,
+            value: item.id,
+            selected: false,
+            description: item.description,
+            imageSrc: item.iconUrl
+        });
+    });
+    return result;
+};
+
+module.exports.createPriorityCombo = function (jiraMeta) {
+    const result = [];
+    jiraMeta.issuetypes[0].fields.priority.allowedValues.forEach(function (item) {
+        result.push({
+            text: item.name,
+            value: item.id,
+            selected: false,
+            imageSrc: item.iconUrl
+        });
+    });
+    return result;
 };

@@ -5,12 +5,13 @@ block title
 block scripts
     script(type='text/javascript', src='/javascripts/jquery-3.2.1.js')
     script(type='text/javascript', src='/javascripts/jquery-outside-events-plugin.js')
-    script(type='text/javascript', src='/javascripts/jquery.dd.js')
-    link(rel='stylesheet', type='text/css', href='/stylesheets/dd.css')
+    script(type='text/javascript', src='/javascripts/jquery.ddslick.js')
     link(rel='stylesheet', type='text/css', href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
     script.
         var cardsArray = JSON.parse('!{JSON.stringify(cards)}');
         var jiraMeta = JSON.parse('!{JSON.stringify(jiraMeta)}');
+        var issueTypesCombo = JSON.parse('!{JSON.stringify(issueTypesCombo)}');
+        var priorityCombo = JSON.parse('!{JSON.stringify(priorityCombo)}');
         var whoShowsTrelloInfo = undefined;
 
         function isChildOf(element, parentId) {
@@ -18,23 +19,25 @@ block scripts
         }
 
         $(function () {
+            $("#issueTypesSelect").ddslick({
+                data: issueTypesCombo,
+                width: 200,
+                selectText: "Issue type...",
+                imagePosition: "left",
+                onSelected: function (selectedData) {
+                    //callback function: do something with selectedData;
+                }
+            });
 
-            try {
-                var $issueTypesSelect = $("#issueTypesSelect");
-                $issueTypesSelect.msDropDown();
-
-                jiraMeta.issuetypes.forEach(function (item) {
-                    $issueTypesSelect
-                        .append($('<option />')
-                            .attr("value", item.id)
-                            .attr("data-image", item.iconUrl)
-                            .text(item.name));
-                });
-
-            } catch (e) {
-                alert(e.message);
-            }
-
+            $("#prioritySelect").ddslick({
+                data: priorityCombo,
+                width: 200,
+                selectText: "Priority...",
+                imagePosition: "left",
+                onSelected: function (selectedData) {
+                    //callback function: do something with selectedData;
+                }
+            });
 
             var cards = $("*[id$='_text']")
             cards.click(function (e) {
@@ -111,17 +114,20 @@ block content
                     section.cell
                         each card in cards
                             section.css-table(style="width=100%;")
-                                section.two-column
+                                if processSeveral
+                                    section.two-column
+                                unless processSeveral
+                                    section
                                     if processSeveral
                                         section.cell(style="display: inline-block;")
                                             .text
                                                 input(type='checkbox', name='cards', id= card.id, value= card.name)
                                         section.cell
-                                            .text
+                                            div(style="width=90%;")
                                                 h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px")= card.name
                                     unless processSeveral
                                         section.cell(style="display: block;")
-                                            .text
+                                            div(style="width=90%;")
                                                 h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px", id= card.id + "_text")= card.name
                     section#info.cell(style="display: none; background-color: #F7F7F7;")
                         section.css-table
@@ -141,7 +147,8 @@ block content
                                         div#_info_labels
                     section#meta.cell(style="display: none;")
                         div#_meta
-                            select#issueTypesSelect
+                            div#issueTypesSelect
+                            div#prioritySelect
                             unless processSeveral
                                 .text-center(style="margin: 30px;")
                             button.btn.btn-danger.btn-lg(type='submit')

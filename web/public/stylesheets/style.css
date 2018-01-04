@@ -215,7 +215,7 @@ acronym {
   width: 33.33333%;
 }
 .css-table .three-column .cell * {
-  width: 90%;
+  /*width: 90%;*/
 }
 .css-table .four-column {
   display: table-row;

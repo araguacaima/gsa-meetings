@@ -105,6 +105,8 @@ module.exports = function (router, passport) {
         listInfoAndCredentials.listId = req.params.listId;
         listInfoAndCredentials.listName = req.query.listName;
         jira.getCreatemeta(req.cookies.jiraUserId).then((jiraMeta) => {
+            const issueTypesCombo = jira.createIssueTypesCombo(jiraMeta);
+            const priorityCombo = jira.createPriorityCombo(jiraMeta);
             trello.getCardsOnList(listInfoAndCredentials, res).then(function (result) {
                 if (!result.error) {
                     res.render('trello-cards', {
@@ -113,7 +115,9 @@ module.exports = function (router, passport) {
                         processSeveral: result.processSeveral,
                         areMeetings: result.areMeetings,
                         authorised: req.isAuthenticated(),
-                        jiraMeta: jiraMeta
+                        jiraMeta: jiraMeta,
+                        issueTypesCombo: issueTypesCombo,
+                        priorityCombo: priorityCombo
                     });
                 } else {
                     res.redirect('/login/trello');
