@@ -6,7 +6,9 @@ block scripts
     script(type='text/javascript', src='/javascripts/jquery-3.2.1.js')
     script(type='text/javascript', src='/javascripts/jquery-outside-events-plugin.js')
     script(type='text/javascript', src='/javascripts/jquery.ddslick.js')
+    script(type='text/javascript', src='/javascripts/jquery-ui.js')
     link(rel='stylesheet', type='text/css', href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
+    link(rel='stylesheet', type='text/css', href='/stylesheets/jquery-ui.theme.css')
     script.
         var cardsStr = '!{JSON.stringify(cards)}'.replace(/\n/g, "<br>");
         var cardsArray = JSON.parse(cardsStr);
@@ -20,6 +22,14 @@ block scripts
         }
 
         $(function () {
+
+            $("#parent").autocomplete({
+                minLength: 3,
+                source: function (request, response) {
+
+                }
+            });
+
             $("#issueTypesSelect").ddslick({
                 data: issueTypesCombo,
                 width: 200,
@@ -163,6 +173,7 @@ block content
                         div#_meta
                             div#issueTypesSelect
                             div#prioritySelect
+                            div#parent
                             unless processSeveral
                                 .text-center(style="margin: 30px;")
                             button.btn.btn-danger.btn-lg(type='submit')
