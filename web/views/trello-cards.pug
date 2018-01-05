@@ -26,7 +26,7 @@ block scripts
             $("#parent").autocomplete({
                 minLength: 3,
                 source: function (request, response) {
-                //jira.issuePicker(request.term, function(data){response(data);}
+                    jira.issuePicker(request.term, function(data){response(data);});
                 }
             });
 
