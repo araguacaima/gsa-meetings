@@ -31,4 +31,10 @@
 
 .ui-widget-content {
     border: 0;
+    display: list-item;
+}
+
+.ui-autocomplete li {
+    font-size: 12px;
+    text-align: left;
 }
