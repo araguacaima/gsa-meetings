@@ -125,8 +125,8 @@ module.exports = function (router, passport) {
                             authorised: req.isAuthenticated(),
                             jiraMeta: jiraMeta,
                             issueTypesCombo: issueTypesCombo,
-                            priorityCombo: priorityCombo
-
+                            priorityCombo: priorityCombo,
+                            locals: {jira: jira}
                         });
                     });
                 } else {

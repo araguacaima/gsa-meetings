@@ -26,7 +26,7 @@ block scripts
             $("#parent").autocomplete({
                 minLength: 3,
                 source: function (request, response) {
-
+                //jira.issuePicker(request.term, function(data){response(data);}
                 }
             });
 
@@ -173,7 +173,8 @@ block content
                         div#_meta
                             div#issueTypesSelect
                             div#prioritySelect
-                            div#parent
+                            label(for="parent") Parent:&nbsp;
+                            input#parent
                             unless processSeveral
                                 .text-center(style="margin: 30px;")
                             button.btn.btn-danger.btn-lg(type='submit')
