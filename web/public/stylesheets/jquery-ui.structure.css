@@ -8,6 +8,11 @@
  *
  * http://api.jqueryui.com/category/theming/
  */
+
+.ui-widget-content{
+	border: 0;
+}
+
 .ui-draggable-handle {
 	-ms-touch-action: none;
 	touch-action: none;

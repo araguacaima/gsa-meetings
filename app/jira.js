@@ -68,7 +68,7 @@ module.exports.issueSearch = function (jiraUserId, text) {
             };
             return jiraTools.invoke(credentials.token, methodGet, url, args)
         } else {
-            return data.issues;
+            return data;
         }
     }).then((data) => {
         return data.issues.map(function (issue) {
