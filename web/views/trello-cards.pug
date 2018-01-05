@@ -76,7 +76,7 @@ block scripts
                 var info = cardInfo[0];
                 var comments = [];
                 info.comments.forEach(function (comment) {
-                    comments.push("[" + comment.memberCreator.username + "] _" + comment.date.split("T")[0] + "_: " + comment.data.text);
+                    comments.push(" * *" + comment.memberCreator.username + " | {color:#707070}_" + comment.date.split("T")[0] + "_{color}:* " + comment.data.text);
                 });
                 $("#_info_description").html(
                     (info.desc !== undefined ? "h2. <strong>Descripción:</strong><br>" +
