@@ -1,7 +1,7 @@
 const jiraTools = require('../app/jiraTools');
 const auth = require('../config/auth').jiraAuth;
 const issuesAPIUri = "/rest/api/2/issue/{id}";
-const issuesPickerAPIUri = "/rest/api/2/issue/picker";
+const issuesSearchAPIUri = "/rest/api/2/search";
 const createmetaAPIUri = "/rest/api/2/issue/createmeta";
 const methodGet = "GET";
 const createmetaParams = {
@@ -40,22 +40,25 @@ module.exports.getIssue = function (jiraUserId, callback, errCallback) {
 };
 
 
-module.exports.issuePicker = function (text, callback, errCallback) {
-    const messages = [];
+module.exports.issueSearch = function (jiraUserId, text) {
+    let textTrimed = text.trim();
+    let jql = "text ~ '" + textTrimed + "' or id = '" + textTrimed + "'";
     let args = {
-        parameters: {"query": text},
+        parameters: {"jql": jql},
         headers: {
             "Accept": "application/json"
         }
     };
-    const url = auth.base_url + issuesPickerAPIUri;
-    jiraTools.invoke(jiraUserId, methodGet, url, args,
-        function (result) {
-            messages.push("The following Jira tickets have been received: " + result + "!");
-        },
-        errCallback
-    );
-    callback(messages);
+    return new Promise(function (resolve, reject) {
+        jiraTools.getCredentials(jiraUserId)
+            .then((credentials) => resolve(credentials))
+            .catch(reject);
+    }).then(function (credentials) {
+        const url = auth.base_url + issuesSearchAPIUri;
+        return jiraTools.invoke(credentials.token, methodGet, url, args)
+    }).then((data) => {
+        return data;
+    });
 };
 
 module.exports.getCreatemeta = function (jiraUserId) {

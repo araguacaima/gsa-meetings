@@ -126,7 +126,7 @@ module.exports = function (router, passport) {
                             jiraMeta: jiraMeta,
                             issueTypesCombo: issueTypesCombo,
                             priorityCombo: priorityCombo,
-                            locals: {jira: jira}
+                            jiraIssuePicker: jira.issueSearch
                         });
                     });
                 } else {
@@ -211,7 +211,7 @@ module.exports = function (router, passport) {
         res.redirect('/login');
     });
 
-    router.post('/jira/ticket', ensureAuthenticated, jiraControllers.createTicket, function (req, res) {
+    router.post('/jira/tickets', ensureAuthenticated, jiraControllers.createTicket, function (req, res) {
         jira.getIssue(req.cookies.jiraUserId, function (messages) {
             res.render('index', {
                 title: 'GSA Tools',
@@ -222,6 +222,14 @@ module.exports = function (router, passport) {
         }, res.redirect('/login/jira'));
     });
 
+    router.get('/jira/tickets', ensureAuthenticated, function (req, res) {
+        jira.issueSearch(req.cookies.jiraUserId, req.query.q)
+            .then((issues) => res.send(issues))
+            .catch((err) => {
+                console.log(err);
+                res.send({})
+            });
+    });
 
     router.get('/login/jira',
         function (req, res) {

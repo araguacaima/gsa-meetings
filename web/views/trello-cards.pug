@@ -26,7 +26,10 @@ block scripts
             $("#parent").autocomplete({
                 minLength: 3,
                 source: function (request, response) {
-                    jira.issuePicker(request.term, function(data){response(data);});
+                    $.get("/jira/tickets", {q: request.term})
+                        .done(function (data) {
+                            response(data);
+                        });
                 }
             });
 
@@ -131,7 +134,7 @@ block scripts
 block content
     h1 Pick up your trello cards.
     br
-    form(action='/jira/ticket', method='post')
+    form(action='/jira/tickets', method='post')
         .container
             section.css-table
                 section.three-column
