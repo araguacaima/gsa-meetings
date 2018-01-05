@@ -14,11 +14,12 @@
     "express-validator": "^4.3.0",
     "google-auth-library": "^0.12.0",
     "googleapis": "^23.0.0",
+    "http": "0.0.0",
     "jira": "^0.9.2",
-    "json2md": "^1.5.10",
+    "json2md": "^1.5.11",
     "method-override": "~2.3.6",
     "moment-business-days": "^1.0.6",
-    "mongoose": "^4.13.7",
+    "mongoose": "^4.13.8",
     "morgan": "~1.7.0",
     "node-rest-client": "^3.1.0",
     "oauth": "^0.9.15",
@@ -29,8 +30,7 @@
     "passport-twitter": "~1.0.4",
     "pug": "^2.0.0-rc.4",
     "serve-favicon": "^2.4.5",
-    "uuid": "^3.1.0",
-    "http": "^0.0.0",
-    "url": "0.11.0"
+    "url": "^0.11.0",
+    "uuid": "^3.1.0"
   }
 }

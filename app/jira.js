@@ -1,6 +1,7 @@
 const jiraTools = require('../app/jiraTools');
 const auth = require('../config/auth').jiraAuth;
 const issuesAPIUri = "/rest/api/2/issue/{id}";
+const issuesPickerAPIUri = "/rest/api/2/issue/picker";
 const createmetaAPIUri = "/rest/api/2/issue/createmeta";
 const methodGet = "GET";
 const createmetaParams = {
@@ -38,6 +39,24 @@ module.exports.getIssue = function (jiraUserId, callback, errCallback) {
     callback(messages);
 };
 
+
+module.exports.issuePicker = function (text, callback, errCallback) {
+    const messages = [];
+    let args = {
+        parameters: {"query": text},
+        headers: {
+            "Accept": "application/json"
+        }
+    };
+    const url = auth.base_url + issuesPickerAPIUri;
+    jiraTools.invoke(jiraUserId, methodGet, url, args,
+        function (result) {
+            messages.push("The following Jira tickets have been received: " + result + "!");
+        },
+        errCallback
+    );
+    callback(messages);
+};
 
 module.exports.getCreatemeta = function (jiraUserId) {
     return new Promise(function (resolve, reject) {

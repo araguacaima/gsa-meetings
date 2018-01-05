@@ -75,8 +75,20 @@ block scripts
                 });
                 var info = cardInfo[0];
                 var comments = [];
-                info.comments.forEach(function (comment) {
-                    comments.push(" * *" + comment.memberCreator.username + " | {color:#707070}_" + comment.date.split("T")[0] + "_{color}:* " + comment.data.text);
+                let creationDate;
+                info.actions.forEach(function (action) {
+                    if (action.type === "commentCard") {
+                        comments.push(" * *" + action.memberCreator.username + " | {color:#707070}_" + action.date.split("T")[0] + "_{color}:* " + action.data.text);
+                    } else if (action.type === "createCard") {
+                        var updateDate = new Date(action.date);
+                        if (creationDate === undefined) {
+                            creationDate = updateDate;
+                        } else {
+                            if (updateDate < creationDate) {
+                                creationDate = updateDate;
+                            }
+                        }
+                    }
                 });
                 $("#_info_description").html(
                     (info.desc !== undefined ? "h2. <strong>Descripción:</strong><br>" +

@@ -87,7 +87,7 @@ module.exports.getBoardLists = function (boardIdAndCredentials, res) {
     });
 };
 
-module.exports.getComments = function (cardInfoAndCredentials, res) {
+module.exports.getActions = function (cardInfoAndCredentials, res) {
     return new Promise(function (resolve, reject) {
         trelloTools.getCredentials(res).then((credentials) => {
             if (credentials.isNew) {
@@ -101,7 +101,7 @@ module.exports.getComments = function (cardInfoAndCredentials, res) {
         cardInfoAndCredentials.credentials = credentials;
         return new Promise(function (resolve, reject) {
             trelloTools.getOAuthClient().get(
-                `${uri}/1/cards/${cardInfoAndCredentials.cardId}/actions`,
+                `${uri}/1/cards/${cardInfoAndCredentials.cardId}/actions?filter=commentCard,createCard`,
                 cardInfoAndCredentials.credentials.token,
                 cardInfoAndCredentials.credentials.secret,
                 function (err, data, response) {
@@ -109,7 +109,8 @@ module.exports.getComments = function (cardInfoAndCredentials, res) {
                         let result = {actions: JSON.parse(data)};
                         let actions = result.actions;
                         const actionsFiltered = actions.filter(function (action) {
-                            return action.type === "commentCard"
+                            //return action.type === "commentCard"
+                            return true;
                         });
                         resolve(actionsFiltered);
                     } else {

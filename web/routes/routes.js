@@ -114,7 +114,7 @@ module.exports = function (router, passport) {
                     cards.forEach(function (card) {
                         let cardInfoAndCredentials = {};
                         cardInfoAndCredentials.cardId = card.id;
-                        promises.push(trello.getComments(cardInfoAndCredentials, res).then((comments) => card.comments = comments));
+                        promises.push(trello.getActions(cardInfoAndCredentials, res).then((actions) => card.actions = actions));
                     });
                     Promise.all(promises).then(function (resolve, reject) {
                         res.render('trello-cards', {
@@ -126,6 +126,7 @@ module.exports = function (router, passport) {
                             jiraMeta: jiraMeta,
                             issueTypesCombo: issueTypesCombo,
                             priorityCombo: priorityCombo
+
                         });
                     });
                 } else {
