@@ -87,7 +87,7 @@ module.exports.getBoardLists = function (boardIdAndCredentials, res) {
     });
 };
 
-module.exports.getCardsOnList = function (listIsAndCredentials, res) {
+module.exports.getComments = function (cardInfoAndCredentials, res) {
     return new Promise(function (resolve, reject) {
         trelloTools.getCredentials(res).then((credentials) => {
             if (credentials.isNew) {
@@ -98,19 +98,58 @@ module.exports.getCardsOnList = function (listIsAndCredentials, res) {
             }
         });
     }).then(function (credentials, userId) {
-        listIsAndCredentials.credentials = credentials;
+        cardInfoAndCredentials.credentials = credentials;
+        return new Promise(function (resolve, reject) {
+            trelloTools.getOAuthClient().get(
+                `${uri}/1/cards/${cardInfoAndCredentials.cardId}/actions`,
+                cardInfoAndCredentials.credentials.token,
+                cardInfoAndCredentials.credentials.secret,
+                function (err, data, response) {
+                    if (!err) {
+                        let result = {actions: JSON.parse(data)};
+                        let actions = result.actions;
+                        const actionsFiltered = actions.filter(function (action) {
+                            return action.type === "commentCard"
+                        });
+                        resolve(actionsFiltered);
+                    } else {
+                        if (err && data === 'invalid token') {
+                            err.renewTokens = {};
+                            err.renewTokens.trello = true;
+                            trelloTools.deleteCredentials(userId);
+                        }
+                        reject(err);
+                    }
+                }
+            );
+        })
+    });
+};
+
+module.exports.getCardsOnList = function (listInfoAndCredentials, res) {
+    return new Promise(function (resolve, reject) {
+        trelloTools.getCredentials(res).then((credentials) => {
+            if (credentials.isNew) {
+                res.req.session.redirectUrl = res.req.url;
+                trelloTools.authorize(res, credentials.token, '/trello/lists')
+            } else {
+                resolve(credentials, res.req.cookies.trelloUserId);
+            }
+        });
+    }).then(function (credentials, userId) {
+        listInfoAndCredentials.credentials = credentials;
         return new Promise(function (resolve, reject) {
             trelloTools.getOAuthClient().get(
                 /*api to gets cards in a given list, in a given board of a particular user: https://api.trello.com/1/lists/<listId>/cards */
-                `${uri}/1/lists/${listIsAndCredentials.listId}/cards`,
-                listIsAndCredentials.credentials.token,
-                listIsAndCredentials.credentials.secret,
+                `${uri}/1/lists/${listInfoAndCredentials.listId}/cards`,
+                listInfoAndCredentials.credentials.token,
+                listInfoAndCredentials.credentials.secret,
                 function (err, data, response) {
                     if (!err) {
                         let result = {cards: JSON.parse(data)};
-                        if (listIsAndCredentials.listName === 'Done') {
+                        if (listInfoAndCredentials.listName === 'Done') {
                             result.processSeveral = true;
-                        } else if (listIsAndCredentials.listName === 'Meetings') {
+                        } else if (listInfoAndCredentials.listName === 'Meetings') {
                             result.areMeetings = true;
                         }
                         resolve(result);

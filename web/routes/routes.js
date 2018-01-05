@@ -109,15 +109,24 @@ module.exports = function (router, passport) {
             const priorityCombo = jira.createPriorityCombo(jiraMeta);
             trello.getCardsOnList(listInfoAndCredentials, res).then(function (result) {
                 if (!result.error) {
-                    res.render('trello-cards', {
-                        title: 'GSA | Trello Cards',
-                        cards: result.cards,
-                        processSeveral: result.processSeveral,
-                        areMeetings: result.areMeetings,
-                        authorised: req.isAuthenticated(),
-                        jiraMeta: jiraMeta,
-                        issueTypesCombo: issueTypesCombo,
-                        priorityCombo: priorityCombo
+                    let cards = result.cards;
+                    const promises = [];
+                    cards.forEach(function (card) {
+                        let cardInfoAndCredentials = {};
+                        cardInfoAndCredentials.cardId = card.id;
+                        promises.push(trello.getComments(cardInfoAndCredentials, res).then((comments) => card.comments = comments));
+                    });
+                    Promise.all(promises).then(function (resolve, reject) {
+                        res.render('trello-cards', {
+                            title: 'GSA | Trello Cards',
+                            cards: cards,
+                            processSeveral: result.processSeveral,
+                            areMeetings: result.areMeetings,
+                            authorised: req.isAuthenticated(),
+                            jiraMeta: jiraMeta,
+                            issueTypesCombo: issueTypesCombo,
+                            priorityCombo: priorityCombo
+                        });
                     });
                 } else {
                     res.redirect('/login/trello');

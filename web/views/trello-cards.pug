@@ -8,7 +8,8 @@ block scripts
     script(type='text/javascript', src='/javascripts/jquery.ddslick.js')
     link(rel='stylesheet', type='text/css', href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
     script.
-        var cardsArray = JSON.parse('!{JSON.stringify(cards)}');
+        var cardsStr = '!{JSON.stringify(cards)}'.replace(/\n/g, "<br>");
+        var cardsArray = JSON.parse(cardsStr);
         var jiraMeta = JSON.parse('!{JSON.stringify(jiraMeta)}');
         var issueTypesCombo = JSON.parse('!{JSON.stringify(issueTypesCombo)}');
         var priorityCombo = JSON.parse('!{JSON.stringify(priorityCombo)}');
@@ -41,7 +42,6 @@ block scripts
 
             var cards = $("*[id$='_text']")
             cards.click(function (e) {
-
                 var cards = $("*[id$='_text']")
                 cards.each(function (index, element) {
                     var $element = $(element);
@@ -74,17 +74,20 @@ block scripts
                     return e.id === id;
                 });
                 var info = cardInfo[0];
-                var comments = undefined;
+                var comments = [];
+                info.comments.forEach(function (comment) {
+                    comments.push("[" + comment.memberCreator.username + "] _" + comment.date.split("T")[0] + "_: " + comment.data.text);
+                });
                 $("#_info_description").html(
                     (info.desc !== undefined ? "h2. <strong>Descripción:</strong><br>" +
                         "<br>" +
                         info.desc + "<br><br>" : "") +
-                    (comments !== undefined ? "h2. <strong>Comentarios:</strong><br>" +
+                    (comments.length > 0 ? "h2. <strong>Comentarios:</strong><br>" +
                         "<br>" +
-                        comments + "<br><br>" : "") +
-                    "h2. <strong>Fecha de compromiso:</strong><br>" +
-                    "<br>" +
-                    info.due + "<br><br>" +
+                        comments.join("<br>") + "<br><br>" : "") +
+                    (info.due !== undefined ? "h2. <strong>Fecha de compromiso:</strong><br>" +
+                        "<br>" +
+                        info.due.split("T")[0] + "<br><br>" : "") +
                     "h2. <strong>Migrado desde:</strong><br>" +
                     "<br>" +
                     info.shortUrl + "<br>");
@@ -94,7 +97,6 @@ block scripts
                     labels_.push(element.name.replace(/[ /|]/g, "-"));
                 });
                 $("#_info_labels").text(labels_.join());
-                //$("#_meta").text("<br><br>Jira Metadata<br>" + JSON.stringify(jiraMeta.issuetypes, null, 2));
                 whoShowsTrelloInfo = id;
                 $("#info").show();
                 $("#meta").show();
