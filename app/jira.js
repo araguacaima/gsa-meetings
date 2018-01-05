@@ -42,27 +42,40 @@ module.exports.getIssue = function (jiraUserId, callback, errCallback) {
 
 module.exports.issueSearch = function (jiraUserId, text) {
     let textTrimed = text.trim();
-    let jql = "text ~ '" + textTrimed + "' or id = '" + textTrimed + "'";
-    let args = {
-        parameters: {"jql": jql},
-        headers: {
-            "Accept": "application/json"
-        }
-    };
     return new Promise(function (resolve, reject) {
         jiraTools.getCredentials(jiraUserId)
             .then((credentials) => resolve(credentials))
             .catch(reject);
     }).then(function (credentials) {
         const url = auth.base_url + issuesSearchAPIUri;
-        return jiraTools.invoke(credentials.token, methodGet, url, args)
+        let jql = "text ~ '" + textTrimed + "'";
+        let args = {
+            parameters: {"jql": jql},
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+        return Promise.all([jiraTools.invoke(credentials.token, methodGet, url, args), credentials]);
+    }).then(([data, credentials]) => {
+        if (data.issues.length === 0) {
+            const url = auth.base_url + issuesSearchAPIUri;
+            let jql = "id = '" + textTrimed + "'";
+            let args = {
+                parameters: {"jql": jql},
+                headers: {
+                    "Accept": "application/json"
+                }
+            };
+            return jiraTools.invoke(credentials.token, methodGet, url, args)
+        } else {
+            return data.issues;
+        }
     }).then((data) => {
-        const result = data.issues.map(function (issue) {
+        return data.issues.map(function (issue) {
             return {
                 key: issue.key, summary: issue.fields.summary
             };
         });
-        return result;
     });
 };
 

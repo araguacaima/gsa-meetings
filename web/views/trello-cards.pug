@@ -177,7 +177,8 @@ block content
                             div#issueTypesSelect
                             div#prioritySelect
                             label(for="parent") Parent:&nbsp;
-                            input#parent
+                            div.ui-widget
+                                input#parent
                             unless processSeveral
                                 .text-center(style="margin: 30px;")
                             button.btn.btn-danger.btn-lg(type='submit')
