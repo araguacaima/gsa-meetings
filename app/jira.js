@@ -57,7 +57,12 @@ module.exports.issueSearch = function (jiraUserId, text) {
         const url = auth.base_url + issuesSearchAPIUri;
         return jiraTools.invoke(credentials.token, methodGet, url, args)
     }).then((data) => {
-        return data;
+        const result = data.issues.map(function (issue) {
+            return {
+                key: issue.key, summary: issue.fields.summary
+            };
+        });
+        return result;
     });
 };
 
