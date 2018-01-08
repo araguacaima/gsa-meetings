@@ -18,6 +18,7 @@
     "jira": "^0.9.2",
     "json2md": "^1.5.11",
     "method-override": "~2.3.6",
+    "moment": "^2.20.1",
     "moment-business-days": "^1.0.6",
     "mongoose": "^4.13.8",
     "morgan": "~1.7.0",

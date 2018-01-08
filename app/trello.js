@@ -1,6 +1,6 @@
 const trelloTools = require('./trelloTools');
 const uri = "https://api.trello.com";
-
+const moment = require('moment');
 
 module.exports.getUserInfo = function (tokenkeyPair) {
     return new Promise(function (resolve, reject) {
@@ -171,8 +171,10 @@ module.exports.getCardsOnList = function (listInfoAndCredentials, res) {
 module.exports.toJira = function (trelloInfo) {
     const created = trelloInfo.created;
     const lastActivity = trelloInfo.lastActivity;
-    let timeSpent = new Date(lastActivity) - new Date(created);
-    timeSpent = timeSpent/60 + "m";
+    let dateLast = moment(lastActivity);
+    let dateCreated = moment(created);
+    let timeSpent = dateLast.diff(dateCreated, 'minutes');
+    timeSpent = timeSpent + "m";
     let issue = {
         update: {
             worklog: [
@@ -198,7 +200,7 @@ module.exports.toJira = function (trelloInfo) {
             priority: {
                 id: trelloInfo.priority
             },
-            labels: trelloInfo.split(","),
+            labels: trelloInfo.labels.split(","),
             description: trelloInfo.description,
 /*            "assignee": {
                 "name": "homer"
