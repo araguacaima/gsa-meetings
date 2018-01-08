@@ -7,6 +7,7 @@ block scripts
     script(type='text/javascript', src='/javascripts/jquery-outside-events-plugin.js')
     script(type='text/javascript', src='/javascripts/jquery.ddslick.js')
     script(type='text/javascript', src='/javascripts/jquery-ui.js')
+    script(type='text/javascript', src='/bower_components/moment/moment.js')
     link(rel='stylesheet', type='text/css', href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
     link(rel='stylesheet', type='text/css', href='/stylesheets/jquery-ui.css')
     link(rel='stylesheet', type='text/css', href='/stylesheets/autocomplete.css')
@@ -135,6 +136,10 @@ block scripts
                         }
                     }
                 });
+                let dateLast = moment(lastActivityDate);
+                let dateCreated = moment(creationDate);
+                let timeSpent = dateLast.diff(dateCreated, 'hours');
+                timeSpent = timeSpent + " Horas";
                 $("#created").val(creationDate.toISOString());
                 $("#lastActivity").val(lastActivityDate.toISOString());
                 $("#_info_description").html(
@@ -152,22 +157,28 @@ block scripts
                     info.shortUrl + "<br><br>" +
                     "h2. <strong>Creado:</strong><br>" +
                     "<br>" +
-                    creationDate.toISOString() + "<br>");
-                $("#_info_description_hidden").val((info.desc !== undefined ? "h2. <strong>Descripción:</strong>\\n" +
-                    "\\n" +
-                    info.desc + "\\n\\n" : "") +
-                    (comments.length > 0 ? "h2. <strong>Comentarios:</strong>\\n" +
-                        "\\n" +
-                        comments.join("\\n") + "\\n\\n" : "") +
-                    (info.due !== undefined ? "h2. <strong>Fecha de compromiso:</strong>\\n" +
-                        "\\n" +
-                        info.due.split("T")[0] + "\\n\\n" : "") +
-                    "h2. <strong>Migrado desde:</strong>\\n" +
-                    "\\n" +
-                    info.shortUrl + "\\n\\n" +
-                    "h2. <strong>Creado:</strong>\\n" +
-                    "\\n" +
-                    creationDate.toISOString() + "\\n")
+                    creationDate.toISOString() + "<br><br>" +
+                    "h2. <strong>Duración:</strong><br>" +
+                    "<br>" +
+                    timeSpent + "<br>");
+                $("#_info_description_hidden").val((info.desc !== undefined ? "h2. *Descripción:*\n" +
+                    "\n" +
+                    info.desc + "\n\n" : "") +
+                    (comments.length > 0 ? "h2. *Comentarios:*\n" +
+                        "\n" +
+                        comments.join("\n") + "\n\n" : "") +
+                    (info.due !== undefined ? "h2. *Fecha de compromiso:*\n" +
+                        "\n" +
+                        info.due.split("T")[0] + "\n\n" : "") +
+                    "h2. *Migrado desde:*\n" +
+                    "\n" +
+                    info.shortUrl + "\n\n" +
+                    "h2. *Creado:*\n" +
+                    "\n" +
+                    creationDate.toISOString() + "\n\n" +
+                    "h2. *Duración:*\n" +
+                    "\n" +
+                    timeSpent);
                 var labels = info.labels;
                 var labels_ = [];
                 labels.forEach(function (element) {

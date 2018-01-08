@@ -6,6 +6,7 @@ const issuesSearchAPIUri = "/rest/api/2/search";
 const createmetaAPIUri = "/rest/api/2/issue/createmeta";
 const myselfAPIUri = "/rest/api/2/myself";
 const methodGet = "GET";
+const methodPost = "POST";
 const createmetaParams = {
     parameters: {
         expand: "projects.issuetypes.fields",
@@ -26,14 +27,12 @@ module.exports.createIssue = function (jiraUserId, issue) {
         const url = auth.base_url + issueCreateAPIUri;
         let args = {
             data: issue,
-            path: {"id": issueKey},
-            parameters: {},
             headers: {
                 "Content-Type": "application/json",
                 "Accept": "application/json"
             }
         };
-        return jiraTools.invoke(credentials.token, methodGet, url, args);
+        return jiraTools.invoke(credentials.token, methodPost, url, args);
     }).then((data) => {
         return data;
     });

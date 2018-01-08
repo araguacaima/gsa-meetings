@@ -1,6 +1,7 @@
 const trelloTools = require('./trelloTools');
 const uri = "https://api.trello.com";
 const moment = require('moment');
+const settings = require("../config/settings");
 
 module.exports.getUserInfo = function (tokenkeyPair) {
     return new Promise(function (resolve, reject) {
@@ -173,19 +174,19 @@ module.exports.toJira = function (trelloInfo) {
     const lastActivity = trelloInfo.lastActivity;
     let dateLast = moment(lastActivity);
     let dateCreated = moment(created);
-    let timeSpent = dateLast.diff(dateCreated, 'minutes');
-    timeSpent = timeSpent + "m";
-    let issue = {
-        update: {
+    let timeSpent = dateLast.diff(dateCreated, 'hours');
+    timeSpent = timeSpent + "h";
+    return {
+/*        update: {
             worklog: [
                 {
                     add: {
                         timeSpent: timeSpent,
-                        started: created
+                        started: dateCreated.format(settings.dateFormatRFC3339)
                     }
                 }
             ]
-        },
+        },*/
         fields: {
             project: {
                 id: trelloInfo.project_id
@@ -194,18 +195,17 @@ module.exports.toJira = function (trelloInfo) {
             issuetype: {
                 id: trelloInfo.issue_type
             },
-            reporter: {
-                name: trelloInfo.user
-            },
+            /*            reporter: {
+                            name: trelloInfo.user
+                        },*/
             priority: {
                 id: trelloInfo.priority
             },
             labels: trelloInfo.labels.split(","),
             description: trelloInfo.description,
-/*            "assignee": {
-                "name": "homer"
-            }*/
+            /*            "assignee": {
+                            "name": "homer"
+                        }*/
         }
     };
-    return issue;
 };

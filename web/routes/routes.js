@@ -216,8 +216,8 @@ module.exports = function (router, passport) {
     router.post('/jira/tickets', ensureAuthenticated, /*jiraControllers.createTicket, */function (req, res) {
         const issue = trello.toJira(req.body);
         jira.createIssue(req.cookies.jiraUserId, issue)
-            .then((messages) => {
-                if (messages === undefined || messages.length === 0) {
+            .then((data) => {
+                if (data.errors === undefined) {
                     res.render('index', {
                         title: 'GSA Tools',
                         config: auth,
