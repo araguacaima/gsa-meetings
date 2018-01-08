@@ -220,6 +220,9 @@ module.exports = function (router, passport) {
         const issue = trello.toJira(req.body);
         jira.createIssue(req.cookies.jiraUserId, issue)
             .then((data) => {
+
+            })
+            .then((data) => {
                 if (data.errors === undefined) {
                     res.render('index', {
                         title: 'GSA Tools',

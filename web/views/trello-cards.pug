@@ -116,6 +116,14 @@ block scripts
                 info.actions.forEach(function (action) {
                     if (action.type === "commentCard") {
                         comments.push(" * *" + action.memberCreator.username + " | {color:#707070}_" + action.date.split("T")[0] + "_{color}:* " + action.data.text);
+                        var updateCommentDate = new Date(action.date);
+                        if (lastActivityDate === undefined) {
+                            lastActivityDate = updateCommentDate;
+                        } else {
+                            if (updateCommentDate > lastActivityDate) {
+                                lastActivityDate = updateCommentDate;
+                            }
+                        }
                     } else if (action.type === "createCard") {
                         var updateCreationDate = new Date(action.date);
                         if (creationDate === undefined) {
@@ -130,7 +138,7 @@ block scripts
                         if (lastActivityDate === undefined) {
                             lastActivityDate = updateLastActivityDate;
                         } else {
-                            if (updateLastActivityDate < lastActivityDate) {
+                            if (updateLastActivityDate > lastActivityDate) {
                                 lastActivityDate = updateLastActivityDate;
                             }
                         }
@@ -139,7 +147,16 @@ block scripts
                 let dateLast = moment(lastActivityDate);
                 let dateCreated = moment(creationDate);
                 let timeSpent = dateLast.diff(dateCreated, 'hours');
-                timeSpent = timeSpent + " Horas";
+                if (timeSpent === 0) {
+                    timeSpent = dateLast.diff(dateCreated, 'minutes');
+                    if (timeSpent === 0) {
+                        timeSpent = "1 Minuto";
+                    } else {
+                        timeSpent = timeSpent + " Minutos";
+                    }
+                } else {
+                    timeSpent = timeSpent + " Horas";
+                }
                 $("#created").val(creationDate.toISOString());
                 $("#lastActivity").val(lastActivityDate.toISOString());
                 $("#_info_description").html(
@@ -222,7 +239,7 @@ block content
                                         section.cell
                                             div(style="width=90%;")
                                                 h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px")= card.name
-                                                input(type='hidden', name= 'card_'+card.id, id= card.id, value= card.name)
+                                                input(type='hidden', name= 'card_' + card.id, id= card.id, value= card.name)
                                     unless processSeveral
                                         section.cell(style="display: block;")
                                             div(style="width=90%;")
