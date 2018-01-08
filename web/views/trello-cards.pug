@@ -161,13 +161,13 @@ block scripts
                 $("#created").val(creationDate.toISOString());
                 $("#lastActivity").val(lastActivityDate.toISOString());
                 $("#_info_description").html(
-                    (info.desc !== undefined ? "h2. <strong>Descripción:</strong><br>" +
+                    (info.desc !== undefined && info.desc !== null ? "h2. <strong>Descripción:</strong><br>" +
                         "<br>" +
                         info.desc + "<br><br>" : "") +
                     (comments.length > 0 ? "h2. <strong>Comentarios:</strong><br>" +
                         "<br>" +
                         comments.join("<br>") + "<br><br>" : "") +
-                    (info.due !== undefined ? "h2. <strong>Fecha de compromiso:</strong><br>" +
+                    (info.due !== undefined && info.due !== null ? "h2. <strong>Fecha de compromiso:</strong><br>" +
                         "<br>" +
                         info.due.split("T")[0] + "<br><br>" : "") +
                     "h2. <strong>Migrado desde:</strong><br>" +
@@ -179,13 +179,13 @@ block scripts
                     "h2. <strong>Duración:</strong><br>" +
                     "<br>" +
                     timeSpent + "<br>");
-                $("#_info_description_hidden").val((info.desc !== undefined ? "h2. *Descripción:*\n" +
+                $("#_info_description_hidden").val((info.desc !== undefined && info.desc !== null ? "h2. *Descripción:*\n" +
                     "\n" +
                     info.desc + "\n\n" : "") +
                     (comments.length > 0 ? "h2. *Comentarios:*\n" +
                         "\n" +
                         comments.join("\n").replace(/<br>/g, "\n") + "\n\n" : "") +
-                    (info.due !== undefined ? "h2. *Fecha de compromiso:*\n" +
+                    (info.due !== undefined && info.due !== null ? "h2. *Fecha de compromiso:*\n" +
                         "\n" +
                         info.due.split("T")[0] + "\n\n" : "") +
                     "h2. *Migrado desde:*\n" +
