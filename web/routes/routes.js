@@ -1,4 +1,5 @@
-const auth = require('../../config/auth').googleAuth;
+const googleAuth = require('../../config/auth').googleAuth;
+const jiraAuth = require('../../config/auth').jiraAuth;
 const settings = require('../../config/settings');
 const calendars = require('../../app/calendars');
 const trello = require('../../app/trello');
@@ -20,7 +21,7 @@ module.exports = function (router, passport) {
     router.get('/', ensureAuthenticated, function (req, res) {
         res.render('index', {
             title: 'GSA Tools',
-            config: auth,
+            config: googleAuth,
             authorised: req.isAuthenticated()
         });
     });
@@ -154,7 +155,7 @@ module.exports = function (router, passport) {
     router.get('/picker', ensureAuthenticated, function (req, res) {
         res.render('picker', {
             title: 'GSA | Picker',
-            config: auth,
+            config: googleAuth,
             authorised: req.isAuthenticated()
         });
     });
@@ -189,7 +190,7 @@ module.exports = function (router, passport) {
     // send to google to do the authentication
     router.get('/auth/google',
         passport.authenticate('google', {
-                scope: ['profile', 'email'].concat(auth.scopes),
+                scope: ['profile', 'email'].concat(googleAuth.scopes),
                 access_type: "offline"
             }
         ));
@@ -224,23 +225,23 @@ module.exports = function (router, passport) {
                 if (data.errors === undefined) {
                     let cardStickerInfoAndCredentials = {};
                     cardStickerInfoAndCredentials.stickerId = settings.trello.migratedSticker.id;
-                    cardStickerInfoAndCredentials.cardId = trelloInfo.id;
-                    trello.addSticker(cardStickerInfoAndCredentials, res).resolve(data);
+                    cardStickerInfoAndCredentials.cardId = trelloInfo.cardId;
+                    return Promise.all([trello.addSticker(cardStickerInfoAndCredentials, res), data]);
                 } else {
                     throw new Error(data.errors);
                 }
             })
-            .then((data) => {
+            .then(([data, jiraIssue]) => {
                 let cardCommentInfoAndCredentials = {};
-                cardCommentInfoAndCredentials.cardId = trelloInfo.id;
-                cardCommentInfoAndCredentials.comment = data;
-                trello.addComment(cardCommentInfoAndCredentials, res).resolve(data);
+                cardCommentInfoAndCredentials.cardId = trelloInfo.cardId;
+                cardCommentInfoAndCredentials.comment = "Migrado a: " + jiraAuth.base_url + "/browse/" + jiraIssue.key + "\n(" + jiraIssue.self + ")";
+                return trello.addComment(cardCommentInfoAndCredentials, res);
             })
             .then((data) => {
                 if (data.errors === undefined) {
                     res.render('index', {
                         title: 'GSA Tools',
-                        config: auth,
+                        config: googleAuth,
                         authorised: req.isAuthenticated(),
                         messages: data.errors
                     });
@@ -290,7 +291,7 @@ module.exports = function (router, passport) {
                         if (!err) {
                             res.render('index', {
                                 title: 'GSA Tools',
-                                config: auth,
+                                config: googleAuth,
                                 authorised: req.isAuthenticated()
                             });
                         } else {
@@ -313,7 +314,7 @@ module.exports = function (router, passport) {
                         if (!err) {
                             res.render('index', {
                                 title: 'GSA Tools',
-                                config: auth,
+                                config: googleAuth,
                                 authorised: req.isAuthenticated()
                             });
                         } else {

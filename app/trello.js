@@ -273,7 +273,9 @@ module.exports.toJira = function (trelloInfo) {
         timeSpent = timeSpent + "h";
     }
 
-    let labels = trelloInfo.labels.split(",");
+    let labels = trelloInfo.labels.split(",").map((label) => {
+        return label.replace("---", "/").replace("--", "/").replace("-", "/").replace("Consultas/Otros", "Consultas");
+    });
     if (trelloInfo.delegated) {
         labels.push("Delegated");
     }

@@ -110,6 +110,7 @@ block scripts
                 });
                 var info = cardInfo[0];
                 $("#card").val(info.name);
+                $("#cardId").val(id);
                 var comments = [];
                 let creationDate;
                 let lastActivityDate;
@@ -183,7 +184,7 @@ block scripts
                     info.desc + "\n\n" : "") +
                     (comments.length > 0 ? "h2. *Comentarios:*\n" +
                         "\n" +
-                        comments.join("\n") + "\n\n" : "") +
+                        comments.join("\n").replace(/<br>/g, "\n") + "\n\n" : "") +
                     (info.due !== undefined ? "h2. *Fecha de compromiso:*\n" +
                         "\n" +
                         info.due.split("T")[0] + "\n\n" : "") +
@@ -221,6 +222,7 @@ block content
                 section.three-column
                     section.cell
                         input(type='hidden', name= 'card', id= 'card')
+                        input(type='hidden', name= 'cardId', id= 'cardId')
                         input(type='hidden', name= 'created', id= 'created')
                         input(type='hidden', name= 'lastActivity', id= 'lastActivity')
                         input(type='hidden', name= 'user', id= 'user', value= user)
