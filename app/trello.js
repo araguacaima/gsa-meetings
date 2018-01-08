@@ -101,7 +101,7 @@ module.exports.getActions = function (cardInfoAndCredentials, res) {
         cardInfoAndCredentials.credentials = credentials;
         return new Promise(function (resolve, reject) {
             trelloTools.getOAuthClient().get(
-                `${uri}/1/cards/${cardInfoAndCredentials.cardId}/actions?filter=commentCard,createCard`,
+                `${uri}/1/cards/${cardInfoAndCredentials.cardId}/actions?filter=commentCard,createCard,updateCard`,
                 cardInfoAndCredentials.credentials.token,
                 cardInfoAndCredentials.credentials.secret,
                 function (err, data, response) {
@@ -166,4 +166,44 @@ module.exports.getCardsOnList = function (listInfoAndCredentials, res) {
             );
         })
     });
+};
+
+module.exports.toJira = function (trelloInfo) {
+    const created = trelloInfo.created;
+    const lastActivity = trelloInfo.lastActivity;
+    let timeSpent = new Date(lastActivity) - new Date(created);
+    timeSpent = timeSpent/60 + "m";
+    let issue = {
+        update: {
+            worklog: [
+                {
+                    add: {
+                        timeSpent: timeSpent,
+                        started: created
+                    }
+                }
+            ]
+        },
+        fields: {
+            project: {
+                id: trelloInfo.project_id
+            },
+            summary: trelloInfo.card,
+            issuetype: {
+                id: trelloInfo.issue_type
+            },
+            reporter: {
+                name: trelloInfo.user
+            },
+            priority: {
+                id: trelloInfo.priority
+            },
+            labels: trelloInfo.split(","),
+            description: trelloInfo.description,
+/*            "assignee": {
+                "name": "homer"
+            }*/
+        }
+    };
+    return issue;
 };

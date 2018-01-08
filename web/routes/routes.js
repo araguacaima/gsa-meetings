@@ -214,14 +214,21 @@ module.exports = function (router, passport) {
     });
 
     router.post('/jira/tickets', ensureAuthenticated, /*jiraControllers.createTicket, */function (req, res) {
-        jira.createIssue(req.cookies.jiraUserId, function (messages) {
-            res.render('index', {
-                title: 'GSA Tools',
-                config: auth,
-                authorised: req.isAuthenticated(),
-                messages: messages
-            });
-        }, res.redirect('/login/jira'));
+        const issue = trello.toJira(req.body);
+        jira.createIssue(req.cookies.jiraUserId, issue)
+            .then((messages) => {
+                if (messages === undefined || messages.length === 0) {
+                    res.render('index', {
+                        title: 'GSA Tools',
+                        config: auth,
+                        authorised: req.isAuthenticated(),
+                        messages: messages
+                    });
+                } else {
+                    res.redirect('/')
+                }
+            })
+            .catch((ex) => res.redirect('/login/jira'));
     });
 
     router.get('/jira/tickets', ensureAuthenticated, function (req, res) {

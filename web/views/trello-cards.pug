@@ -59,8 +59,8 @@ block scripts
                 width: 200,
                 selectText: "Issue type...",
                 imagePosition: "left",
-                onSelected: function (selectedData) {
-                    $("#issue_type_hidden").val(selectedData);
+                onSelected: function (selected) {
+                    $("#issue_type_hidden").val(selected.selectedData.value);
                 }
             });
 
@@ -69,8 +69,8 @@ block scripts
                 width: 200,
                 selectText: "Priority...",
                 imagePosition: "left",
-                onSelected: function (selectedData) {
-                    $("#priority_hidden").val(selectedData);
+                onSelected: function (selected) {
+                    $("#priority_hidden").val(selected.selectedData.value);
                 }
             });
 
@@ -111,20 +111,32 @@ block scripts
                 $("#card").val(info.name);
                 var comments = [];
                 let creationDate;
+                let lastActivityDate;
                 info.actions.forEach(function (action) {
                     if (action.type === "commentCard") {
                         comments.push(" * *" + action.memberCreator.username + " | {color:#707070}_" + action.date.split("T")[0] + "_{color}:* " + action.data.text);
                     } else if (action.type === "createCard") {
-                        var updateDate = new Date(action.date);
+                        var updateCreationDate = new Date(action.date);
                         if (creationDate === undefined) {
-                            creationDate = updateDate;
+                            creationDate = updateCreationDate;
                         } else {
-                            if (updateDate < creationDate) {
-                                creationDate = updateDate;
+                            if (updateCreationDate < creationDate) {
+                                creationDate = updateCreationDate;
+                            }
+                        }
+                    } else if (action.type === "updateCard") {
+                        var updateLastActivityDate = new Date(action.date);
+                        if (lastActivityDate === undefined) {
+                            lastActivityDate = updateLastActivityDate;
+                        } else {
+                            if (updateLastActivityDate < lastActivityDate) {
+                                lastActivityDate = updateLastActivityDate;
                             }
                         }
                     }
                 });
+                $("#created").val(creationDate.toISOString());
+                $("#lastActivity").val(lastActivityDate.toISOString());
                 $("#_info_description").html(
                     (info.desc !== undefined ? "h2. <strong>Descripción:</strong><br>" +
                         "<br>" +
@@ -137,7 +149,10 @@ block scripts
                         info.due.split("T")[0] + "<br><br>" : "") +
                     "h2. <strong>Migrado desde:</strong><br>" +
                     "<br>" +
-                    info.shortUrl + "<br>");
+                    info.shortUrl + "<br><br>" +
+                    "h2. <strong>Creado:</strong><br>" +
+                    "<br>" +
+                    creationDate.toISOString() + "<br>");
                 $("#_info_description_hidden").val((info.desc !== undefined ? "h2. <strong>Descripción:</strong>\\n" +
                     "\\n" +
                     info.desc + "\\n\\n" : "") +
@@ -149,7 +164,10 @@ block scripts
                         info.due.split("T")[0] + "\\n\\n" : "") +
                     "h2. <strong>Migrado desde:</strong>\\n" +
                     "\\n" +
-                    info.shortUrl + "\\n")
+                    info.shortUrl + "\\n\\n" +
+                    "h2. <strong>Creado:</strong>\\n" +
+                    "\\n" +
+                    creationDate.toISOString() + "\\n")
                 var labels = info.labels;
                 var labels_ = [];
                 labels.forEach(function (element) {
@@ -175,6 +193,9 @@ block content
                 section.three-column
                     section.cell
                         input(type='hidden', name= 'card', id= 'card')
+                        input(type='hidden', name= 'created', id= 'created')
+                        input(type='hidden', name= 'lastActivity', id= 'lastActivity')
+                        input(type='hidden', name= 'user', id= 'user', value= user)
                         each card in cards
                             section.css-table(style="width=100%;")
                                 if processSeveral
@@ -216,9 +237,9 @@ block content
                             h4= jiraProject.key + " [" + jiraProject.id + "]"
                             input#jira_project_info_hidden(type='hidden', value=jiraProject.id, name='project_id')
                             div#issueTypesSelect
-                                input#issue_type_hidden(type='hidden', name='issue_type')
+                            input#issue_type_hidden(type='hidden', name='issue_type')
                             div#prioritySelect
-                                input#priority_hidden(type='hidden', name='priority')
+                            input#priority_hidden(type='hidden', name='priority')
                             label(for="parent") Parent:&nbsp;
                             div.ui-widget
                                 input#parent(name='parent')
