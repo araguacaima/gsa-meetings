@@ -21,7 +21,7 @@ block scripts
               listName = $this.attr("value");
           }
         });
-        const href = previuosHref.replace(":listId", listId); + "?listName=" + listName;
+        const href = previuosHref.replace(":listId", listId) + "?listName=" + listName;
         target.attr('href', href);
       });
     });

@@ -103,8 +103,10 @@ module.exports = function (router, passport) {
     // show the home page (will also have our login links)
     router.get('/trello/lists/:listId/cards', ensureAuthenticated, function (req, res) {
         let listInfoAndCredentials = {};
+        let listName = req.query.listName;
         listInfoAndCredentials.listId = req.params.listId;
-        listInfoAndCredentials.listName = req.query.listName;
+        listInfoAndCredentials.listName = listName;
+        listInfoAndCredentials.delegated = listName.toUpperCase() === "DELEGATED";
         jira.getCreatemeta(req.cookies.jiraUserId).then((jiraMeta) => {
             jira.getMyself(req.cookies.jiraUserId).then((user) => {
                     const issueTypesCombo = jira.createIssueTypesCombo(jiraMeta);
@@ -129,7 +131,8 @@ module.exports = function (router, passport) {
                                     issueTypesCombo: issueTypesCombo,
                                     priorityCombo: priorityCombo,
                                     jiraProject: settings.jira.solutionArchitects.project,
-                                    userName: user.name
+                                    userName: user.name,
+                                    delegated: listInfoAndCredentials.delegated
                                 });
                             });
                         } else {
@@ -213,7 +216,7 @@ module.exports = function (router, passport) {
         res.redirect('/login');
     });
 
-    router.post('/jira/tickets', ensureAuthenticated, /*jiraControllers.createTicket, */function (req, res) {
+    router.post('/jira/trello/tickets', ensureAuthenticated, /*jiraControllers.createTicket, */function (req, res) {
         const issue = trello.toJira(req.body);
         jira.createIssue(req.cookies.jiraUserId, issue)
             .then((data) => {

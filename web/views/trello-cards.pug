@@ -198,7 +198,7 @@ block scripts
 block content
     h1 Pick up your trello cards.
     br
-    form(action='/jira/tickets', method='post')
+    form(action='/jira/trello/tickets', method='post')
         .container
             section.css-table
                 section.three-column
@@ -207,6 +207,8 @@ block content
                         input(type='hidden', name= 'created', id= 'created')
                         input(type='hidden', name= 'lastActivity', id= 'lastActivity')
                         input(type='hidden', name= 'user', id= 'user', value= user)
+                        if delegated
+                            input(type='hidden', name= 'delegated', id= 'delegated', value='true')
                         each card in cards
                             section.css-table(style="width=100%;")
                                 if processSeveral

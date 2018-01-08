@@ -143,12 +143,24 @@ module.exports.getCardsOnList = function (listInfoAndCredentials, res) {
         return new Promise(function (resolve, reject) {
             trelloTools.getOAuthClient().get(
                 /*api to gets cards in a given list, in a given board of a particular user: https://api.trello.com/1/lists/<listId>/cards */
-                `${uri}/1/lists/${listInfoAndCredentials.listId}/cards`,
+                `${uri}/1/lists/${listInfoAndCredentials.listId}/cards?stickers=true`,
                 listInfoAndCredentials.credentials.token,
                 listInfoAndCredentials.credentials.secret,
                 function (err, data, response) {
                     if (!err) {
-                        let result = {cards: JSON.parse(data)};
+                        let cards = JSON.parse(data);
+                        cards = cards.filter((card) => {
+                            let migrated = false;
+                            if (card.stickers && card.stickers.length > 0) {
+                                card.stickers.forEach((sticker) => {
+                                    if (sticker.image = "rocketship") {
+                                        migrated = true;
+                                    }
+                                });
+                            }
+                            return !migrated;
+                        });
+                        let result = {cards: cards};
                         if (listInfoAndCredentials.listName === 'Done') {
                             result.processSeveral = true;
                         } else if (listInfoAndCredentials.listName === 'Meetings') {
@@ -176,17 +188,21 @@ module.exports.toJira = function (trelloInfo) {
     let dateCreated = moment(created);
     let timeSpent = dateLast.diff(dateCreated, 'hours');
     timeSpent = timeSpent + "h";
+    let labels = trelloInfo.labels.split(",");
+    if (trelloInfo.delegated) {
+        labels.push("Delegated");
+    }
     return {
-/*        update: {
-            worklog: [
-                {
-                    add: {
-                        timeSpent: timeSpent,
-                        started: dateCreated.format(settings.dateFormatRFC3339)
-                    }
-                }
-            ]
-        },*/
+        /*        update: {
+                    worklog: [
+                        {
+                            add: {
+                                timeSpent: timeSpent,
+                                started: dateCreated.format(settings.dateFormatRFC3339)
+                            }
+                        }
+                    ]
+                },*/
         fields: {
             project: {
                 id: trelloInfo.project_id
@@ -201,7 +217,7 @@ module.exports.toJira = function (trelloInfo) {
             priority: {
                 id: trelloInfo.priority
             },
-            labels: trelloInfo.labels.split(","),
+            labels: labels,
             description: trelloInfo.description,
             /*            "assignee": {
                             "name": "homer"
