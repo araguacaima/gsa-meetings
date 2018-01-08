@@ -21,3 +21,9 @@ module.exports.jira = {
         }
     }
 };
+module.exports.trello = {
+    migratedSticker: {
+        id : "5a539e9802490d7171a2af56",
+        image: "rocketship"
+    }
+};

@@ -217,10 +217,24 @@ module.exports = function (router, passport) {
     });
 
     router.post('/jira/trello/tickets', ensureAuthenticated, /*jiraControllers.createTicket, */function (req, res) {
-        const issue = trello.toJira(req.body);
+        let trelloInfo = req.body;
+        const issue = trello.toJira(trelloInfo);
         jira.createIssue(req.cookies.jiraUserId, issue)
             .then((data) => {
-
+                if (data.errors === undefined) {
+                    let cardStickerInfoAndCredentials = {};
+                    cardStickerInfoAndCredentials.stickerId = settings.trello.migratedSticker.id;
+                    cardStickerInfoAndCredentials.cardId = trelloInfo.id;
+                    trello.addSticker(cardStickerInfoAndCredentials, res).resolve(data);
+                } else {
+                    throw new Error(data.errors);
+                }
+            })
+            .then((data) => {
+                let cardCommentInfoAndCredentials = {};
+                cardCommentInfoAndCredentials.cardId = trelloInfo.id;
+                cardCommentInfoAndCredentials.comment = data;
+                trello.addComment(cardCommentInfoAndCredentials, res).resolve(data);
             })
             .then((data) => {
                 if (data.errors === undefined) {
@@ -228,7 +242,7 @@ module.exports = function (router, passport) {
                         title: 'GSA Tools',
                         config: auth,
                         authorised: req.isAuthenticated(),
-                        messages: messages
+                        messages: data.errors
                     });
                 } else {
                     res.redirect('/')

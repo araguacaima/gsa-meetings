@@ -128,6 +128,78 @@ module.exports.getActions = function (cardInfoAndCredentials, res) {
     });
 };
 
+module.exports.addSticker = function (cardStickerInfoAndCredentials, res) {
+    return new Promise(function (resolve, reject) {
+        trelloTools.getCredentials(res).then((credentials) => {
+            if (credentials.isNew) {
+                res.req.session.redirectUrl = res.req.url;
+                trelloTools.authorize(res, credentials.token, '/trello/lists')
+            } else {
+                resolve(credentials, res.req.cookies.trelloUserId);
+            }
+        });
+    }).then(function (credentials, userId) {
+        cardStickerInfoAndCredentials.credentials = credentials;
+        return new Promise(function (resolve, reject) {
+            trelloTools.getOAuthClient().put(
+                `${uri}/cards/${cardStickerInfoAndCredentials.cardId}/stickers/${cardStickerInfoAndCredentials.stickerId}`,
+                cardStickerInfoAndCredentials.credentials.token,
+                cardStickerInfoAndCredentials.credentials.secret,
+                {},
+                "",
+                function (err, data, response) {
+                    if (!err) {
+                        resolve(data);
+                    } else {
+                        if (err && data === 'invalid token') {
+                            err.renewTokens = {};
+                            err.renewTokens.trello = true;
+                            trelloTools.deleteCredentials(userId);
+                        }
+                        reject(err);
+                    }
+                }
+            );
+        })
+    });
+};
+
+module.exports.addComment = function (cardCommentInfoAndCredentials, res) {
+    return new Promise(function (resolve, reject) {
+        trelloTools.getCredentials(res).then((credentials) => {
+            if (credentials.isNew) {
+                res.req.session.redirectUrl = res.req.url;
+                trelloTools.authorize(res, credentials.token, '/trello/lists')
+            } else {
+                resolve(credentials, res.req.cookies.trelloUserId);
+            }
+        });
+    }).then(function (credentials, userId) {
+        cardCommentInfoAndCredentials.credentials = credentials;
+        return new Promise(function (resolve, reject) {
+            trelloTools.getOAuthClient().post(
+                `${uri}/cards/${cardCommentInfoAndCredentials.cardId}/actions/comments?text=${cardCommentInfoAndCredentials.comment}`,
+                cardCommentInfoAndCredentials.credentials.token,
+                cardCommentInfoAndCredentials.credentials.secret,
+                {},
+                "",
+                function (err, data, response) {
+                    if (!err) {
+                        resolve(data);
+                    } else {
+                        if (err && data === 'invalid token') {
+                            err.renewTokens = {};
+                            err.renewTokens.trello = true;
+                            trelloTools.deleteCredentials(userId);
+                        }
+                        reject(err);
+                    }
+                }
+            );
+        })
+    });
+};
+
 module.exports.getCardsOnList = function (listInfoAndCredentials, res) {
     return new Promise(function (resolve, reject) {
         trelloTools.getCredentials(res).then((credentials) => {
@@ -153,7 +225,7 @@ module.exports.getCardsOnList = function (listInfoAndCredentials, res) {
                             let migrated = false;
                             if (card.stickers && card.stickers.length > 0) {
                                 card.stickers.forEach((sticker) => {
-                                    if (sticker.image = "rocketship") {
+                                    if (sticker.id = settings.trello.migratedSticker.id) {
                                         migrated = true;
                                     }
                                 });
@@ -187,7 +259,20 @@ module.exports.toJira = function (trelloInfo) {
     let dateLast = moment(lastActivity);
     let dateCreated = moment(created);
     let timeSpent = dateLast.diff(dateCreated, 'hours');
-    timeSpent = timeSpent + "h";
+    if (timeSpent === 0) {
+        timeSpent = dateLast.diff(dateCreated, 'minutes');
+        if (timeSpent === 0) {
+            timeSpent = "1m";
+        } else {
+            timeSpent = timeSpent + "m";
+        }
+    } else {
+        if (trelloInfo.diarySpentInHours && trelloInfo.diarySpentInHours > 0) {
+            timeSpent = Math.round((timeSpent / 24) * trelloInfo.diarySpentInHours);
+        }
+        timeSpent = timeSpent + "h";
+    }
+
     let labels = trelloInfo.labels.split(",");
     if (trelloInfo.delegated) {
         labels.push("Delegated");
