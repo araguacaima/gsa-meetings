@@ -60,7 +60,7 @@ block scripts
                 selectText: "Issue type...",
                 imagePosition: "left",
                 onSelected: function (selectedData) {
-                    //callback function: do something with selectedData;
+                    $("#issue_type_hidden").val(selectedData);
                 }
             });
 
@@ -70,7 +70,7 @@ block scripts
                 selectText: "Priority...",
                 imagePosition: "left",
                 onSelected: function (selectedData) {
-                    //callback function: do something with selectedData;
+                    $("#priority_hidden").val(selectedData);
                 }
             });
 
@@ -108,6 +108,7 @@ block scripts
                     return e.id === id;
                 });
                 var info = cardInfo[0];
+                $("#card").val(info.name);
                 var comments = [];
                 let creationDate;
                 info.actions.forEach(function (action) {
@@ -137,12 +138,25 @@ block scripts
                     "h2. <strong>Migrado desde:</strong><br>" +
                     "<br>" +
                     info.shortUrl + "<br>");
+                $("#_info_description_hidden").val((info.desc !== undefined ? "h2. <strong>Descripción:</strong>\\n" +
+                    "\\n" +
+                    info.desc + "\\n\\n" : "") +
+                    (comments.length > 0 ? "h2. <strong>Comentarios:</strong>\\n" +
+                        "\\n" +
+                        comments.join("\\n") + "\\n\\n" : "") +
+                    (info.due !== undefined ? "h2. <strong>Fecha de compromiso:</strong>\\n" +
+                        "\\n" +
+                        info.due.split("T")[0] + "\\n\\n" : "") +
+                    "h2. <strong>Migrado desde:</strong>\\n" +
+                    "\\n" +
+                    info.shortUrl + "\\n")
                 var labels = info.labels;
                 var labels_ = [];
                 labels.forEach(function (element) {
                     labels_.push(element.name.replace(/[ /|]/g, "-"));
                 });
                 $("#_info_labels").text(labels_.join());
+                $("#_info_labels_hidden").val(labels_.join());
                 whoShowsTrelloInfo = id;
                 $("#info").show();
                 $("#meta").show();
@@ -160,6 +174,7 @@ block content
             section.css-table
                 section.three-column
                     section.cell
+                        input(type='hidden', name= 'card', id= 'card')
                         each card in cards
                             section.css-table(style="width=100%;")
                                 if processSeveral
@@ -173,6 +188,7 @@ block content
                                         section.cell
                                             div(style="width=90%;")
                                                 h3(style="margin-bottom: 0; margin-top: 0; margin-left: 10px")= card.name
+                                                input(type='hidden', name= 'card_'+card.id, id= card.id, value= card.name)
                                     unless processSeveral
                                         section.cell(style="display: block;")
                                             div(style="width=90%;")
@@ -182,24 +198,30 @@ block content
                             section.two-column
                                 section.cell(style="vertical-align: middle;")
                                     .text
-                                        h4#_info_description_label Description:
+                                        h4 Description:
                                 section.cell(style="vertical-align: middle;")
                                     .text
                                         div#_info_description
+                                        input#_info_description_hidden(type='hidden', name='description')
                             section.two-column
                                 section.cell(style="vertical-align: middle;")
                                     .text
-                                        h4#_info_labels_label Labels:
+                                        h4 Labels:
                                 section.cell(style="vertical-align: middle;")
                                     .text
                                         div#_info_labels
+                                        input#_info_labels_hidden(type='hidden', name='labels')
                     section#meta.cell
                         div#_meta
+                            h4= jiraProject.key + " [" + jiraProject.id + "]"
+                            input#jira_project_info_hidden(type='hidden', value=jiraProject.id, name='project_id')
                             div#issueTypesSelect
+                                input#issue_type_hidden(type='hidden', name='issue_type')
                             div#prioritySelect
+                                input#priority_hidden(type='hidden', name='priority')
                             label(for="parent") Parent:&nbsp;
                             div.ui-widget
-                                input#parent
+                                input#parent(name='parent')
                             unless processSeveral
                                 .text-center(style="margin: 30px;")
                             button.btn.btn-danger.btn-lg(type='submit')

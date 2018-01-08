@@ -1,8 +1,10 @@
 const jiraTools = require('../app/jiraTools');
 const auth = require('../config/auth').jiraAuth;
-const issuesAPIUri = "/rest/api/2/issue/{id}";
+const issuesGetAPIUri = "/rest/api/2/issue/{id}";
+const issueCreateAPIUri = "/rest/api/2/issue";
 const issuesSearchAPIUri = "/rest/api/2/search";
 const createmetaAPIUri = "/rest/api/2/issue/createmeta";
+const myselfAPIUri = "/rest/api/2/myself";
 const methodGet = "GET";
 const createmetaParams = {
     parameters: {
@@ -11,32 +13,52 @@ const createmetaParams = {
     },
     headers: {"Accept": "application/json", "Content-Type": "application/json"}
 };
-
-
-module.exports.createIssue = function (jiraUserId, callback) {
-    const messages = [];
-    callback(messages);
+const myselfParams = {
+    headers: {"Accept": "application/json", "Content-Type": "application/json"}
 };
 
-module.exports.getIssue = function (jiraUserId, callback, errCallback) {
-    const messages = [];
-    let args = {
-        data: {},
-        path: {"id": "TVP-7409"},
-        parameters: {},
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        }
-    };
-    const url = auth.base_url + issuesAPIUri;
-    jiraTools.invoke(jiraUserId, methodGet, url, args,
-        function (result) {
-            messages.push("The following Jira tickets have been created: " + result + "!");
-        },
-        errCallback
-    );
-    callback(messages);
+module.exports.createIssue = function (jiraUserId, issue) {
+    return new Promise(function (resolve, reject) {
+        jiraTools.getCredentials(jiraUserId)
+            .then((credentials) => resolve(credentials))
+            .catch(reject);
+    }).then(function (credentials) {
+        const url = auth.base_url + issueCreateAPIUri;
+        let args = {
+            data: issue,
+            path: {"id": issueKey},
+            parameters: {},
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+        return jiraTools.invoke(credentials.token, methodGet, url, args);
+    }).then((data) => {
+        return data;
+    });
+};
+
+module.exports.getIssue = function (jiraUserId, issueKey) {
+    return new Promise(function (resolve, reject) {
+        jiraTools.getCredentials(jiraUserId)
+            .then((credentials) => resolve(credentials))
+            .catch(reject);
+    }).then(function (credentials) {
+        const url = auth.base_url + issuesGetAPIUri;
+        let args = {
+            data: {},
+            path: {"id": issueKey},
+            parameters: {},
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+        return jiraTools.invoke(credentials.token, methodGet, url, args);
+    }).then((data) => {
+        return data;
+    });
 };
 
 
@@ -91,6 +113,19 @@ module.exports.getCreatemeta = function (jiraUserId) {
         return data.projects[0];
     });
 
+};
+
+module.exports.getMyself = function (jiraUserId) {
+    return new Promise(function (resolve, reject) {
+        jiraTools.getCredentials(jiraUserId)
+            .then((credentials) => resolve(credentials))
+            .catch(reject);
+    }).then(function (credentials) {
+        const url = auth.base_url + myselfAPIUri;
+        return jiraTools.invoke(credentials.token, methodGet, url, myselfParams)
+    }).then((data) => {
+        return data;
+    });
 };
 
 module.exports.createIssueTypesCombo = function (jiraMeta) {

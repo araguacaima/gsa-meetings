@@ -13,3 +13,11 @@ module.exports.calendarEventsParams = {
     singleEvents: false,
     fields: 'items(creator(displayName,email),description,end(date,dateTime),hangoutLink,htmlLink,id,organizer(displayName,email),created,source,start(date,dateTime),status,summary),summary'
 };
+module.exports.jira = {
+    solutionArchitects: {
+        project: {
+            id: 10135,
+            key: "SA"
+        }
+    }
+};

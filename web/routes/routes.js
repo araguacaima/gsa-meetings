@@ -1,4 +1,5 @@
 const auth = require('../../config/auth').googleAuth;
+const settings = require('../../config/settings');
 const calendars = require('../../app/calendars');
 const trello = require('../../app/trello');
 const jira = require('../../app/jira');
@@ -105,44 +106,45 @@ module.exports = function (router, passport) {
         listInfoAndCredentials.listId = req.params.listId;
         listInfoAndCredentials.listName = req.query.listName;
         jira.getCreatemeta(req.cookies.jiraUserId).then((jiraMeta) => {
-            const issueTypesCombo = jira.createIssueTypesCombo(jiraMeta);
-            const priorityCombo = jira.createPriorityCombo(jiraMeta);
-            trello.getCardsOnList(listInfoAndCredentials, res).then(function (result) {
-                if (!result.error) {
-                    let cards = result.cards;
-                    const promises = [];
-                    cards.forEach(function (card) {
-                        let cardInfoAndCredentials = {};
-                        cardInfoAndCredentials.cardId = card.id;
-                        promises.push(trello.getActions(cardInfoAndCredentials, res).then((actions) => card.actions = actions));
-                    });
-                    Promise.all(promises).then(function (resolve, reject) {
-                        res.render('trello-cards', {
-                            title: 'GSA | Trello Cards',
-                            cards: cards,
-                            processSeveral: result.processSeveral,
-                            areMeetings: result.areMeetings,
-                            authorised: req.isAuthenticated(),
-                            jiraMeta: jiraMeta,
-                            issueTypesCombo: issueTypesCombo,
-                            priorityCombo: priorityCombo,
-                            jiraIssuePicker: jira.issueSearch
-                        });
-                    });
-                } else {
-                    res.redirect('/login/trello');
+            jira.getMyself(req.cookies.jiraUserId).then((user) => {
+                    const issueTypesCombo = jira.createIssueTypesCombo(jiraMeta);
+                    const priorityCombo = jira.createPriorityCombo(jiraMeta);
+                    trello.getCardsOnList(listInfoAndCredentials, res).then(function (result) {
+                        if (!result.error) {
+                            let cards = result.cards;
+                            const promises = [];
+                            cards.forEach(function (card) {
+                                let cardInfoAndCredentials = {};
+                                cardInfoAndCredentials.cardId = card.id;
+                                promises.push(trello.getActions(cardInfoAndCredentials, res).then((actions) => card.actions = actions));
+                            });
+                            Promise.all(promises).then(function (resolve, reject) {
+                                res.render('trello-cards', {
+                                    title: 'GSA | Trello Cards',
+                                    cards: cards,
+                                    processSeveral: result.processSeveral,
+                                    areMeetings: result.areMeetings,
+                                    authorised: req.isAuthenticated(),
+                                    jiraMeta: jiraMeta,
+                                    issueTypesCombo: issueTypesCombo,
+                                    priorityCombo: priorityCombo,
+                                    jiraProject: settings.jira.solutionArchitects.project,
+                                    userName: user.name
+                                });
+                            });
+                        } else {
+                            res.redirect('/login/trello');
+                        }
+                    })
                 }
-            }).catch((err) => {
-                if (err && err.renewTokens.trello) {
-                    res.redirect('/trello')
-                } else {
-                    res.redirect('/login/trello')
-                }
-            })
+            )
         }).catch((err) => {
-            console.log(err);
-            res.redirect('/login/trello');
-        });
+            if (err && err.renewTokens.trello) {
+                res.redirect('/trello')
+            } else {
+                res.redirect('/login/trello')
+            }
+        })
     });
 
     // show the home page (will also have our login links)
@@ -211,8 +213,8 @@ module.exports = function (router, passport) {
         res.redirect('/login');
     });
 
-    router.post('/jira/tickets', ensureAuthenticated, jiraControllers.createTicket, function (req, res) {
-        jira.getIssue(req.cookies.jiraUserId, function (messages) {
+    router.post('/jira/tickets', ensureAuthenticated, /*jiraControllers.createTicket, */function (req, res) {
+        jira.createIssue(req.cookies.jiraUserId, function (messages) {
             res.render('index', {
                 title: 'GSA Tools',
                 config: auth,
