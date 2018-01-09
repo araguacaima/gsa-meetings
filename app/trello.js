@@ -141,12 +141,14 @@ module.exports.addSticker = function (cardStickerInfoAndCredentials, res) {
     }).then(function (credentials, userId) {
         cardStickerInfoAndCredentials.credentials = credentials;
         return new Promise(function (resolve, reject) {
-            trelloTools.getOAuthClient().put(
+            trelloTools.getOAuthClient().post(
                 `${uri}/cards/${cardStickerInfoAndCredentials.cardId}/stickers/${cardStickerInfoAndCredentials.stickerId}`,
                 cardStickerInfoAndCredentials.credentials.token,
                 cardStickerInfoAndCredentials.credentials.secret,
-                {},
-                "",
+                {
+                    image: "rocketship"
+                },
+                settings.defaults.requestContentType,
                 function (err, data, response) {
                     if (!err) {
                         resolve(data);

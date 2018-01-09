@@ -25,3 +25,11 @@ Array.prototype.concatIfNotExist = function (array, comparer) {
         this.pushIfNotExist(element, comparer);
     });
 };
+
+module.exports.escapeJson = function(key, value) {
+    // Filtrando propiedades
+    if (typeof value === "string") {
+        return value.replace(/"/g, "\\\"");
+    }
+    return value;
+};

@@ -14,6 +14,7 @@ const jiraControllers = require('../controllers/jiraControllers');
 const base64 = require('base-64');
 const url = require('url');
 const User = require('../../app/models/user');
+const commons = require('../../app/commons');
 
 module.exports = function (router, passport) {
 
@@ -122,9 +123,10 @@ module.exports = function (router, passport) {
                                 promises.push(trello.getActions(cardInfoAndCredentials, res).then((actions) => card.actions = actions));
                             });
                             Promise.all(promises).then(function (resolve, reject) {
+                                const cardsStr = JSON.stringify(cards, commons.escapeJson);
                                 res.render('trello-cards', {
                                     title: 'GSA | Trello Cards',
-                                    cards: cards,
+                                    cards: JSON.parse(cardsStr),
                                     processSeveral: result.processSeveral,
                                     areMeetings: result.areMeetings,
                                     authorised: req.isAuthenticated(),

@@ -12,7 +12,7 @@ block scripts
     link(rel='stylesheet', type='text/css', href='/stylesheets/jquery-ui.css')
     link(rel='stylesheet', type='text/css', href='/stylesheets/autocomplete.css')
     script.
-        var cardsStr = '!{JSON.stringify(cards)}'.replace(/\n/g, "<br>");
+        var cardsStr = '!{JSON.stringify(cards)}'.replace(/\n/g, "\\\\n").replace(/\r/g, "\\\\r").replace(/\t/g, "\\\\t");
         var cardsArray = JSON.parse(cardsStr);
         var jiraMeta = JSON.parse('!{JSON.stringify(jiraMeta)}');
         var issueTypesCombo = JSON.parse('!{JSON.stringify(issueTypesCombo)}');
