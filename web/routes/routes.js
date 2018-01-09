@@ -236,17 +236,12 @@ module.exports = function (router, passport) {
             .then(([data, jiraIssue]) => {
                 let cardCommentInfoAndCredentials = {};
                 cardCommentInfoAndCredentials.cardId = trelloInfo.cardId;
-                cardCommentInfoAndCredentials.comment = "Migrado a: " + jiraAuth.base_url + "/browse/" + jiraIssue.key + "\n(" + jiraIssue.self + ")";
+                cardCommentInfoAndCredentials.comment = "Migrado a: " + jiraAuth.base_url + "/browse/" + jiraIssue.key + "\n(GET " + jiraIssue.self + ")";
                 return trello.addComment(cardCommentInfoAndCredentials, res);
             })
             .then((data) => {
                 if (data.errors === undefined) {
-                    res.render('index', {
-                        title: 'GSA Tools',
-                        config: googleAuth,
-                        authorised: req.isAuthenticated(),
-                        messages: data.errors
-                    });
+                    res.redirect('/trello');
                 } else {
                     res.redirect('/')
                 }
