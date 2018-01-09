@@ -99,6 +99,7 @@ app.use(function (req, res, next) {
                     }
                 }
                 res.cookie('google_auth_code', req.query.code);
+                req.cookies.google_auth_code = req.query.code;
             }
         }
         next();

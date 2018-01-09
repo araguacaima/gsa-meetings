@@ -25,7 +25,7 @@ function requestForCredentials(req, callback, errCallBack) {
             }
         } else {
             if (err.message === 'invalid_grant') {
-                req.res.cookie("google_auth_renew_token", true);
+                req.res.cookie("google_auth_renew_token", true);req.cookies.google_auth_renew_token=true;
             }
             errCallBack(err.message);
         }
@@ -117,7 +117,7 @@ function authorize(callback) {
     const clientId = auth.client_id;
     const redirectUrl = auth.redirect_uris[1];
     const auth_ = new googleAuth();
-    const oauth2Client = new auth_.OAuth2(clientId, clientSecret, redirectUrl);
+    const oauth2Client = getOAuth2Client();
 
     // Check if we have previously stored a token.
     fs.readFile(TOKEN_PATH, function (err, token) {
