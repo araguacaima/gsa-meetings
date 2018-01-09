@@ -104,7 +104,7 @@ function storeTokens(tokens, callback) {
 }
 
 function authorize(res, token, redirect) {
-    res.redirect(auth.authorize_uri + `?oauth_token=${token}&name=${settings.appName}&return_url=${redirect}`);
+    res.redirect(auth.authorize_uri + `?oauth_token=${token}&name=${settings.appName}&return_url=${redirect}&scope=read,write`);
 }
 
 function getOAuthAccessToken(token, tokenSecret, verifier) {
@@ -124,25 +124,7 @@ function getOAuthAccessToken(token, tokenSecret, verifier) {
 }
 
 function getRequestToken(callback) {
-    getOAuthClient().getOAuthRequestToken(callback);
-}
-
-function getAccessToken(query) {
-    return new Promise(function (resolve, reject) {
-        db.getCachedTokenByReqToken(query.oauth_token).then(function (result) {
-            const token = query.oauth_token;
-            const tokenSecret = result.reqTokenSecret;
-            const verifier = query.oauth_verifier;
-            getOAuthAccessToken(token, tokenSecret, verifier).then(function (result) {
-                if (!result.error) {
-                    resolve(result)
-                } else {
-                    reject(result);
-                }
-            });
-        });
-
-    });
+    getOAuthClient().getOAuthRequestToken({scope: "read,write"}, callback);
 }
 
 module.exports = {
@@ -152,7 +134,6 @@ module.exports = {
     "authorize": authorize,
     "requestForCredentials": requestForCredentials,
     "checkForCredentials": checkForCredentials,
-    "getAccessToken": getAccessToken,
     "getOAuthAccessToken": getOAuthAccessToken,
     "getRequestToken": getRequestToken,
     "deleteCredentials": deleteCredentials

@@ -142,11 +142,16 @@ module.exports.addSticker = function (cardStickerInfoAndCredentials, res) {
         cardStickerInfoAndCredentials.credentials = credentials;
         return new Promise(function (resolve, reject) {
             trelloTools.getOAuthClient().post(
-                `${uri}/cards/${cardStickerInfoAndCredentials.cardId}/stickers/${cardStickerInfoAndCredentials.stickerId}`,
+                `${uri}/1/cards/${cardStickerInfoAndCredentials.cardId}/stickers`,
                 cardStickerInfoAndCredentials.credentials.token,
                 cardStickerInfoAndCredentials.credentials.secret,
                 {
-                    image: "rocketship"
+                    "top":0,
+                    "left":0,
+                    "zIndex":1,
+                    "rotate":0,
+                    "image":"rocketship",
+                    "imageUrl":"https://d2k1ftgv7pobq7.cloudfront.net/images/stickers/rocketship.png"
                 },
                 settings.defaults.requestContentType,
                 function (err, data, response) {
@@ -180,7 +185,7 @@ module.exports.addComment = function (cardCommentInfoAndCredentials, res) {
         cardCommentInfoAndCredentials.credentials = credentials;
         return new Promise(function (resolve, reject) {
             trelloTools.getOAuthClient().post(
-                `${uri}/cards/${cardCommentInfoAndCredentials.cardId}/actions/comments?text=${cardCommentInfoAndCredentials.comment}`,
+                `${uri}/1/cards/${cardCommentInfoAndCredentials.cardId}/actions/comments?text=${cardCommentInfoAndCredentials.comment}`,
                 cardCommentInfoAndCredentials.credentials.token,
                 cardCommentInfoAndCredentials.credentials.secret,
                 {},
@@ -274,7 +279,7 @@ module.exports.toJira = function (trelloInfo) {
         }
         timeSpent = timeSpent + "h";
     }
-
+    trelloInfo.description = trelloInfo.description.substr(0,trelloInfo.description.indexOf("h2. *Duración:*")) + "h2. *Duración:*\n\n" + timeSpent;
     let labels = trelloInfo.labels.split(",").map((label) => {
         return label.replace("---", "/").replace("--", "/").replace("-", "/").replace("Consultas/Otros", "Consultas");
     });
