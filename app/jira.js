@@ -3,6 +3,7 @@ const auth = require('../config/auth').jiraAuth;
 const issuesGetAPIUri = "/rest/api/2/issue/{id}";
 const issueCreateAPIUri = "/rest/api/2/issue";
 const issuesSearchAPIUri = "/rest/api/2/search";
+const usersSearchAPIUri = "/rest/api/2/user/picker";
 const createmetaAPIUri = "/rest/api/2/issue/createmeta";
 const myselfAPIUri = "/rest/api/2/myself";
 const methodGet = "GET";
@@ -100,6 +101,27 @@ module.exports.issueSearch = function (jiraUserId, text) {
     });
 };
 
+module.exports.userSearch = function (jiraUserId, text) {
+    let userSearchText = text.trim();
+    return new Promise(function (resolve, reject) {
+        jiraTools.getCredentials(jiraUserId)
+            .then((credentials) => resolve(credentials))
+            .catch(reject);
+    }).then(function (credentials) {
+        const url = auth.base_url + usersSearchAPIUri;
+        let args = {
+            parameters: {"query": userSearchText, "showAvatar": true},
+            headers: {
+                "Accept": "application/json;charset=UTF-8",
+                "Content-Type": "application/json;charset=UTF-8"
+            }
+        };
+        return jiraTools.invoke(credentials.token, methodGet, url, args);
+    }).then((data) => {
+        return data.users;
+    });
+};
+
 module.exports.getCreatemeta = function (jiraUserId) {
     return new Promise(function (resolve, reject) {
         jiraTools.getCredentials(jiraUserId)
@@ -125,6 +147,20 @@ module.exports.getMyself = function (jiraUserId) {
     }).then((data) => {
         return data;
     });
+};
+
+module.exports.createUsersCombo = function (users) {
+    const result = [];
+    users.forEach(function (user) {
+        result.push({
+            text: user.key,
+            value: user.displayName + " (" + user.name + ")",
+            selected: false,
+            description: user.html,
+            imageSrc: user.avatarUrl
+        });
+    });
+    return result;
 };
 
 module.exports.createIssueTypesCombo = function (jiraMeta) {

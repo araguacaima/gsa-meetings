@@ -222,6 +222,7 @@ module.exports = function (router, passport) {
     router.post('/jira/trello/tickets', ensureAuthenticated, /*jiraControllers.createTicket, */function (req, res) {
         let trelloInfo = req.body;
         const issue = trello.toJira(trelloInfo);
+        const prevUri = req.headers.referer;
         jira.createIssue(req.cookies.jiraUserId, issue)
             .then((data) => {
                 if (data.errors === undefined) {
@@ -241,17 +242,36 @@ module.exports = function (router, passport) {
             })
             .then((data) => {
                 if (data.errors === undefined) {
-                    res.redirect('/trello');
+                    res.redirect(prevUri);
                 } else {
-                    res.redirect('/')
+                    res.redirect(res.redirect(prevUri + "?messages=" + data.errors))
                 }
             })
-            .catch((ex) => res.redirect('/login/jira'));
+            .catch((ex) => res.redirect(prevUri + "?messages=" + ex));
     });
 
     router.get('/jira/tickets', ensureAuthenticated, function (req, res) {
         jira.issueSearch(req.cookies.jiraUserId, req.query.q)
             .then((issues) => res.send(issues))
+            .catch((err) => {
+                console.log(err);
+                res.send({})
+            });
+    });
+
+    router.get('/jira/users', ensureAuthenticated, function (req, res) {
+        jira.userSearch(req.cookies.jiraUserId, req.query.q)
+            .then((users) => res.send(users))
+            .catch((err) => {
+                console.log(err);
+                res.send({})
+            });
+    });
+
+
+    router.get('/jira/users/combo', ensureAuthenticated, function (req, res) {
+        jira.userSearch(req.cookies.jiraUserId, req.query.q)
+            .then((users) => res.send(jira.createUsersCombo(users)))
             .catch((err) => {
                 console.log(err);
                 res.send({})

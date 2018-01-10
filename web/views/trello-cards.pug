@@ -53,7 +53,31 @@ block scripts
             }).on("click", function () {
                 $(this).select();
             });
-            ;
+
+            var $usersSelect = $("#usersSelect");
+
+            $usersSelect.autocomplete({
+                minLength: 3,
+                source: function (request, response) {
+                    $.get("/jira/users/combo", {q: request.term})
+                        .done(function (data) {
+                            response(data);
+                        });
+                },
+                select: function (event, ui) {
+
+                },
+                open: function (event, ui) {
+                    $(".ui-autocomplete").css("z-index", 1000);
+                }
+            }).on("click", function () {
+                $(this).select();
+            }).data("ui-autocomplete")._renderItem = function (ul, item) {
+                return $("<li></li>")
+                    .data("item.autocomplete", item)
+                    .append("<a class='dd-option'><img class='dd-option-image' src='" + item.imageSrc + "'><label class='dd-option-text'>" + item.label + "</a>")
+                    .appendTo(ul);
+            };
 
             $("#issueTypesSelect").ddslick({
                 data: issueTypesCombo,
@@ -214,6 +238,14 @@ block scripts
             });
         });
 block content
+    if messages
+        section.css-table
+            section.cell
+            for message in messages
+                section.css-table
+                    section.cell(style="display: table")
+                        .text-danger
+                            h4!= message
     h1 Pick up your trello cards.
     br
     form(action='/jira/trello/tickets', method='post')
@@ -272,11 +304,12 @@ block content
                             input#issue_type_hidden(type='hidden', name='issue_type')
                             div#prioritySelect
                             input#priority_hidden(type='hidden', name='priority')
-                            label(for="parent") Parent:&nbsp;
                             div.ui-widget
-                                input#parent(name='parent')
-                            label(for="spent") Dedicación diaria:&nbsp;
-                            input#spent(name='diarySpentInHours')
+                                input#parent(name='parent', placeholder='Issue padre...')
+                            input#spent(name='diarySpentInHours', placeholder='Parent issue')
+                            div.ui-widget
+                                input#usersSelect(placeholder='Buscar usuario a asignar...')
+                            input#user_hidden(type='hidden', name='user')
                             unless processSeveral
                                 .text-center(style="margin: 30px;")
                             button.btn.btn-danger.btn-lg(type='submit')
