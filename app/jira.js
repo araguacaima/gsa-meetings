@@ -242,7 +242,7 @@ module.exports.createPriorityCombo = function (jiraMeta) {
     return result;
 };
 
-module.exports.createTransitionsCombo = function (jiraMeta) {
+module.exports.createTransitionsCombo = function () {
     const result = [];
     result.push({
         value: "4",
@@ -273,4 +273,33 @@ module.exports.createTransitionsCombo = function (jiraMeta) {
         imageWidth: 16
     });
     return result;
+};
+
+
+module.exports.createWorklogCombo = function () {
+    return [{
+        value: 1,
+        text: "1"
+    }, {
+        value: 2,
+        text: "2"
+    }, {
+        value: 3,
+        text: "3"
+    }, {
+        value: 4,
+        text: "4"
+    }, {
+        value: 5,
+        text: "5"
+    }, {
+        value: 6,
+        text: "6"
+    }, {
+        value: 7,
+        text: "7"
+    }, {
+        value: 8,
+        text: "8"
+    }];
 };

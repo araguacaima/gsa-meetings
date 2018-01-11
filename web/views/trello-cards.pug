@@ -17,6 +17,7 @@ block scripts
         var jiraMeta = JSON.parse('!{JSON.stringify(jiraMeta)}');
         var issueTypesCombo = JSON.parse('!{JSON.stringify(issueTypesCombo)}');
         var transitionsCombo = JSON.parse('!{JSON.stringify(transitionsCombo)}');
+        var worklogCombo = JSON.parse('!{JSON.stringify(worklogCombo)}');
         var priorityCombo = JSON.parse('!{JSON.stringify(priorityCombo)}');
         var whoShowsTrelloInfo = undefined;
 
@@ -79,6 +80,28 @@ block scripts
                     .append("<a class='dd-option'><img class='dd-option-image' src='" + item.imageSrc + "'" + (item.imageWidth !== null ? " width='" + item.imageWidth + "'" : "") + (item.imageHeight !== null ? " height='" + item.imageHeight + "'" : "") + "><label class='dd-option-text'>" + item.label + "</a>")
                     .appendTo(ul);
             };
+
+            $("#spent").ddslick({
+                data: worklogCombo,
+                width: 200,
+                selectText: "Dedicación diaria...",
+                onSelected: function (selected) {
+                    var worklog = selected.selectedData.value;
+                    var $infoDescriptionHidden = $("#_info_description_hidden");
+                    var $infoDescription = $("#_info_description");
+                    let valueHidden = $infoDescriptionHidden.val();
+                    let spent = valueHidden.substr(valueHidden.indexOf("h2. *Dedicación:*"));
+                    spent = spent.replace("h2. *Dedicación:*", "").replace(" Horas", "").trim().replace("h", "");
+                    worklog = (worklog / spent).toFixed(2);
+                    worklog = worklog + "h";
+                    valueHidden = valueHidden.substr(0, valueHidden.indexOf("h2. *Dedicación:*")) + "h2. *Dedicación:*\n\n" + worklog;
+
+                    $infoDescriptionHidden.val(valueHidden);
+                    let value = $infoDescription.html();
+                    value = value.substr(0, value.indexOf("h2. <strong>Dedicación:</strong>")) + "h2. <strong>Dedicación:</strong><br><br>" + worklog + "<br>";
+                    $infoDescription.html(value);
+                }
+            });
 
             $("#issueTypesSelect").ddslick({
                 data: issueTypesCombo,
@@ -183,16 +206,26 @@ block scripts
                 let dateLast = moment(lastActivityDate);
                 let dateCreated = moment(creationDate);
                 let timeSpent = dateLast.diff(dateCreated, 'hours');
+                let worklog = 0;
+                var spent = $("#spent").val();
+                if (spent === undefined || spent === "" || spent > 0) {
+                    spent = 8;
+                }
                 if (timeSpent === 0) {
                     timeSpent = dateLast.diff(dateCreated, 'minutes');
                     if (timeSpent === 0) {
                         timeSpent = "1 Minuto";
+                        worklog = "1 Minuto";
                     } else {
+                        worklog = (timeSpent * 8 * spent).toFixed(2) + " Minutos";
                         timeSpent = timeSpent + " Minutos";
                     }
                 } else {
+                    worklog = (timeSpent / spent).toFixed(2) + " Horas";
                     timeSpent = timeSpent + " Horas";
                 }
+                $("#spent_hidden").val(worklog + "h");
+
                 $("#created").val(creationDate.toISOString());
                 $("#lastActivity").val(lastActivityDate.toISOString());
                 $("#_info_description").html(
@@ -213,7 +246,10 @@ block scripts
                     creationDate.toISOString() + "<br><br>" +
                     "h2. <strong>Duración:</strong><br>" +
                     "<br>" +
-                    timeSpent + "<br>");
+                    timeSpent + "<br><br>" +
+                    "h2. <strong>Dedicación:</strong><br>" +
+                    "<br>" +
+                    worklog + "<br>");
                 $("#_info_description_hidden").val((info.desc !== undefined && info.desc !== null ? "h2. *Descripción:*\n" +
                     "\n" +
                     info.desc + "\n\n" : "") +
@@ -231,7 +267,10 @@ block scripts
                     creationDate.toISOString() + "\n\n" +
                     "h2. *Duración:*\n" +
                     "\n" +
-                    timeSpent);
+                    timeSpent + "\n\n" +
+                    "h2. *Dedicación:*\n" +
+                    "\n" +
+                    worklog);
                 var labels = info.labels;
                 var labels_ = [];
                 labels.forEach(function (element) {
@@ -317,9 +356,10 @@ block content
                             input#priority_hidden(type='hidden', name='priority')
                             div#statusSelect
                             input#status_hidden(type='hidden', name='status')
+                            input#spent(placeholder='Dedicación diaria')
+                            input#spent_hidden(type='hidden', name='worklog')
                             div.ui-widget
                                 input#parent(name='parent', placeholder='Issue padre...')
-                            input#spent(name='diarySpentInHours', placeholder='Dedicación diaria')
                             div.ui-widget
                                 input#usersSelect(placeholder='Asignar a usuario Jira...')
                             input#user_hidden(type='hidden', name='jiraUser')

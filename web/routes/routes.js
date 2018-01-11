@@ -113,7 +113,8 @@ module.exports = function (router, passport) {
             jira.getMyself(req.cookies.jiraUserId).then((user) => {
                     const issueTypesCombo = jira.createIssueTypesCombo(jiraMeta);
                     const priorityCombo = jira.createPriorityCombo(jiraMeta);
-                    const transitionsCombo = jira.createTransitionsCombo(jiraMeta);
+                    const transitionsCombo = jira.createTransitionsCombo();
+                    const worklogCombo = jira.createWorklogCombo();
                     trello.getCardsOnList(listInfoAndCredentials, res).then(function (result) {
                         if (!result.error) {
                             let cards = result.cards;
@@ -134,6 +135,7 @@ module.exports = function (router, passport) {
                                     jiraMeta: jiraMeta,
                                     issueTypesCombo: issueTypesCombo,
                                     transitionsCombo: transitionsCombo,
+                                    worklogCombo: worklogCombo,
                                     priorityCombo: priorityCombo,
                                     jiraProject: settings.jira.solutionArchitects.project,
                                     userName: user.name,
@@ -232,22 +234,22 @@ module.exports = function (router, passport) {
         }).then(([data, jiraIssueKey]) => {
             if (data.errors === undefined) {
                 const transition = {fields: {}};
-                if (trelloInfo.user) {
-                    transition.fields.asignee = {name: trelloInfo.user};
+                if (trelloInfo.jiraUser) {
+                    transition.fields.asignee = {name: trelloInfo.jiraUser};
                 }
                 transition.fields.transition = {
                     id: trelloInfo.transition
                 };
-                jira.doTransition(req.cookies.jiraUserId, jiraIssueKey, transition);
+                return Promise.all([jira.doTransition(req.cookies.jiraUserId, jiraIssueKey, transition), jiraIssueKey]);
             } else {
                 throw new Error(data.errors);
             }
-        }).then((jiraIssue) => {
-            return Promise.all([jira.assignUser(req.cookies.jiraUserId, jiraIssue.key, {name: trelloInfo.jiraUser}), jiraIssue.key]);
-        }).then(([data, jiraIssue]) => {
+/*        }).then((jiraIssueKey) => {
+            return Promise.all([jira.assignUser(req.cookies.jiraUserId, jiraIssueKey, {name: trelloInfo.jiraUser}), jiraIssueKey]);*/
+        }).then(([data, jiraIssueKey]) => {
             let cardCommentInfoAndCredentials = {};
             cardCommentInfoAndCredentials.cardId = trelloInfo.cardId;
-            cardCommentInfoAndCredentials.comment = "Migrado a: " + jiraAuth.base_url + "/browse/" + jiraIssue.key + "\n(GET " + jiraIssue.self + ")";
+            cardCommentInfoAndCredentials.comment = "Migrado a: " + jiraAuth.base_url + "/browse/" + jiraIssueKey + "\n(GET " + jiraIssue.self + ")";
             return trello.addComment(cardCommentInfoAndCredentials, res);
         }).then((data) => {
             if (data.errors === undefined) {

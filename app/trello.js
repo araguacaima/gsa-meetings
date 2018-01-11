@@ -273,11 +273,6 @@ module.exports.toJira = function (trelloInfo) {
         } else {
             timeSpent = timeSpent + "m";
         }
-    } else {
-        if (trelloInfo.diarySpentInHours && trelloInfo.diarySpentInHours > 0) {
-            timeSpent = Math.round((timeSpent / 24) * trelloInfo.diarySpentInHours);
-        }
-        timeSpent = timeSpent + "h";
     }
     trelloInfo.description = trelloInfo.description.substr(0,trelloInfo.description.indexOf("h2. *Duración:*")) + "h2. *Duración:*\n\n" + timeSpent;
     let labels = trelloInfo.labels.split(",").map((label) => {
