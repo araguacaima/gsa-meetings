@@ -5,9 +5,12 @@ const issueCreateAPIUri = "/rest/api/2/issue";
 const issuesSearchAPIUri = "/rest/api/2/search";
 const usersSearchAPIUri = "/rest/api/2/user/picker";
 const createmetaAPIUri = "/rest/api/2/issue/createmeta";
+const assignAPIUri = "/rest/api/2/issue/{issueIdOrKey}/assignee";
+const doTransitionsAPIUri = "/rest/api/2/issue/{issueIdOrKey}/transitions";
 const myselfAPIUri = "/rest/api/2/myself";
 const methodGet = "GET";
 const methodPost = "POST";
+const methodPut = "PUT";
 const createmetaParams = {
     parameters: {
         expand: "projects.issuetypes.fields",
@@ -101,6 +104,49 @@ module.exports.issueSearch = function (jiraUserId, text) {
     });
 };
 
+module.exports.assignUser = function (jiraUserId, issueKey, user) {
+    return new Promise(function (resolve, reject) {
+        jiraTools.getCredentials(jiraUserId)
+            .then((credentials) => resolve(credentials))
+            .catch(reject);
+    }).then(function (credentials) {
+        const url = auth.base_url + assignAPIUri;
+        let args = {
+            data: user,
+            path: {"issueIdOrKey": issueKey},
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+        return jiraTools.invoke(credentials.token, methodPut, url, args);
+    }).then((data) => {
+        return data;
+    });
+};
+
+
+module.exports.doTransition = function (jiraUserId, issueKey, transition) {
+    return new Promise(function (resolve, reject) {
+        jiraTools.getCredentials(jiraUserId)
+            .then((credentials) => resolve(credentials))
+            .catch(reject);
+    }).then(function (credentials) {
+        const url = auth.base_url + doTransitionsAPIUri;
+        let args = {
+            data: transition,
+            path: {"issueIdOrKey": issueKey},
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+        return jiraTools.invoke(credentials.token, methodPost, url, args);
+    }).then((data) => {
+        return data;
+    });
+};
+
 module.exports.userSearch = function (jiraUserId, text) {
     let userSearchText = text.trim();
     return new Promise(function (resolve, reject) {
@@ -157,7 +203,9 @@ module.exports.createUsersCombo = function (users) {
             value: user.displayName + " (" + user.name + ")",
             selected: false,
             description: user.html,
-            imageSrc: user.avatarUrl
+            imageSrc: user.avatarUrl,
+            imageHeight: 32,
+            imageWidth: 32
         });
     });
     return result;
@@ -171,7 +219,9 @@ module.exports.createIssueTypesCombo = function (jiraMeta) {
             value: item.id,
             selected: false,
             description: item.description,
-            imageSrc: item.iconUrl
+            imageSrc: item.iconUrl,
+            imageHeight: 16,
+            imageWidth: 16
         });
     });
     return result;
@@ -184,8 +234,43 @@ module.exports.createPriorityCombo = function (jiraMeta) {
             text: item.name,
             value: item.id,
             selected: false,
-            imageSrc: item.iconUrl
+            imageSrc: item.iconUrl,
+            imageHeight: 16,
+            imageWidth: 16
         });
+    });
+    return result;
+};
+
+module.exports.createTransitionsCombo = function (jiraMeta) {
+    const result = [];
+    result.push({
+        value: "4",
+        text: "Start Progress",
+        imageSrc: "/images/start.png",
+        imageHeight: 16,
+        imageWidth: 16
+    });
+    result.push({
+        value: "5",
+        text: "Resolve Issue",
+        imageSrc: "/images/check.png",
+        imageHeight: 16,
+        imageWidth: 16
+    });
+    result.push({
+        value: "2",
+        text: "Close Issue",
+        imageSrc: "/images/close.png",
+        imageHeight: 16,
+        imageWidth: 16
+    });
+    result.push({
+        value: "301",
+        text: "Stop Progress",
+        imageSrc: "/images/stop.png",
+        imageHeight: 16,
+        imageWidth: 16
     });
     return result;
 };

@@ -113,6 +113,7 @@ module.exports = function (router, passport) {
             jira.getMyself(req.cookies.jiraUserId).then((user) => {
                     const issueTypesCombo = jira.createIssueTypesCombo(jiraMeta);
                     const priorityCombo = jira.createPriorityCombo(jiraMeta);
+                    const transitionsCombo = jira.createTransitionsCombo(jiraMeta);
                     trello.getCardsOnList(listInfoAndCredentials, res).then(function (result) {
                         if (!result.error) {
                             let cards = result.cards;
@@ -132,6 +133,7 @@ module.exports = function (router, passport) {
                                     authorised: req.isAuthenticated(),
                                     jiraMeta: jiraMeta,
                                     issueTypesCombo: issueTypesCombo,
+                                    transitionsCombo: transitionsCombo,
                                     priorityCombo: priorityCombo,
                                     jiraProject: settings.jira.solutionArchitects.project,
                                     userName: user.name,
@@ -223,31 +225,37 @@ module.exports = function (router, passport) {
         let trelloInfo = req.body;
         const issue = trello.toJira(trelloInfo);
         const prevUri = req.headers.referer;
-        jira.createIssue(req.cookies.jiraUserId, issue)
-            .then((data) => {
-                if (data.errors === undefined) {
-                    let cardStickerInfoAndCredentials = {};
-                    cardStickerInfoAndCredentials.stickerId = settings.trello.migratedSticker.id;
-                    cardStickerInfoAndCredentials.cardId = trelloInfo.cardId;
-                    return Promise.all([trello.addSticker(cardStickerInfoAndCredentials, res), data]);
-                } else {
-                    throw new Error(data.errors);
+        jira.createIssue(req.cookies.jiraUserId, issue).then((data) => {
+            return Promise.all([jira.getMyself(req.cookies.jiraUserId), data]);
+        }).then(([myself, jiraIssue]) => {
+            return Promise.all([jira.assignUser(req.cookies.jiraUserId, jiraIssue.key, {name: myself.name}), jiraIssue.key]);
+        }).then(([data, jiraIssueKey]) => {
+            if (data.errors === undefined) {
+                const transition = {fields: {}};
+                if (trelloInfo.user) {
+                    transition.fields.asignee = {name: trelloInfo.user};
                 }
-            })
-            .then(([data, jiraIssue]) => {
-                let cardCommentInfoAndCredentials = {};
-                cardCommentInfoAndCredentials.cardId = trelloInfo.cardId;
-                cardCommentInfoAndCredentials.comment = "Migrado a: " + jiraAuth.base_url + "/browse/" + jiraIssue.key + "\n(GET " + jiraIssue.self + ")";
-                return trello.addComment(cardCommentInfoAndCredentials, res);
-            })
-            .then((data) => {
-                if (data.errors === undefined) {
-                    res.redirect(prevUri);
-                } else {
-                    res.redirect(res.redirect(prevUri + "?messages=" + data.errors))
-                }
-            })
-            .catch((ex) => res.redirect(prevUri + "?messages=" + ex));
+                transition.fields.transition = {
+                    id: trelloInfo.transition
+                };
+                jira.doTransition(req.cookies.jiraUserId, jiraIssueKey, transition);
+            } else {
+                throw new Error(data.errors);
+            }
+        }).then((jiraIssue) => {
+            return Promise.all([jira.assignUser(req.cookies.jiraUserId, jiraIssue.key, {name: trelloInfo.jiraUser}), jiraIssue.key]);
+        }).then(([data, jiraIssue]) => {
+            let cardCommentInfoAndCredentials = {};
+            cardCommentInfoAndCredentials.cardId = trelloInfo.cardId;
+            cardCommentInfoAndCredentials.comment = "Migrado a: " + jiraAuth.base_url + "/browse/" + jiraIssue.key + "\n(GET " + jiraIssue.self + ")";
+            return trello.addComment(cardCommentInfoAndCredentials, res);
+        }).then((data) => {
+            if (data.errors === undefined) {
+                res.redirect(prevUri);
+            } else {
+                res.redirect(res.redirect(prevUri + "?messages=" + data.errors))
+            }
+        }).catch((ex) => res.redirect(prevUri + "?messages=" + ex));
     });
 
     router.get('/jira/tickets', ensureAuthenticated, function (req, res) {

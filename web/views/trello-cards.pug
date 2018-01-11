@@ -16,6 +16,7 @@ block scripts
         var cardsArray = JSON.parse(cardsStr);
         var jiraMeta = JSON.parse('!{JSON.stringify(jiraMeta)}');
         var issueTypesCombo = JSON.parse('!{JSON.stringify(issueTypesCombo)}');
+        var transitionsCombo = JSON.parse('!{JSON.stringify(transitionsCombo)}');
         var priorityCombo = JSON.parse('!{JSON.stringify(priorityCombo)}');
         var whoShowsTrelloInfo = undefined;
 
@@ -75,14 +76,14 @@ block scripts
             }).data("ui-autocomplete")._renderItem = function (ul, item) {
                 return $("<li></li>")
                     .data("item.autocomplete", item)
-                    .append("<a class='dd-option'><img class='dd-option-image' src='" + item.imageSrc + "'><label class='dd-option-text'>" + item.label + "</a>")
+                    .append("<a class='dd-option'><img class='dd-option-image' src='" + item.imageSrc + "'" + (item.imageWidth !== null ? " width='" + item.imageWidth + "'" : "") + (item.imageHeight !== null ? " height='" + item.imageHeight + "'" : "") + "><label class='dd-option-text'>" + item.label + "</a>")
                     .appendTo(ul);
             };
 
             $("#issueTypesSelect").ddslick({
                 data: issueTypesCombo,
                 width: 200,
-                selectText: "Issue type...",
+                selectText: "Tipo de issue...",
                 imagePosition: "left",
                 onSelected: function (selected) {
                     $("#issue_type_hidden").val(selected.selectedData.value);
@@ -92,10 +93,20 @@ block scripts
             $("#prioritySelect").ddslick({
                 data: priorityCombo,
                 width: 200,
-                selectText: "Priority...",
+                selectText: "Prioridad...",
                 imagePosition: "left",
                 onSelected: function (selected) {
                     $("#priority_hidden").val(selected.selectedData.value);
+                }
+            });
+
+            $("#statusSelect").ddslick({
+                data: transitionsCombo,
+                width: 200,
+                selectText: "Status...",
+                imagePosition: "left",
+                onSelected: function (selected) {
+                    $("#status_hidden").val(selected.selectedData.value);
                 }
             });
 
@@ -304,12 +315,14 @@ block content
                             input#issue_type_hidden(type='hidden', name='issue_type')
                             div#prioritySelect
                             input#priority_hidden(type='hidden', name='priority')
+                            div#statusSelect
+                            input#status_hidden(type='hidden', name='status')
                             div.ui-widget
                                 input#parent(name='parent', placeholder='Issue padre...')
-                            input#spent(name='diarySpentInHours', placeholder='Parent issue')
+                            input#spent(name='diarySpentInHours', placeholder='Dedicación diaria')
                             div.ui-widget
-                                input#usersSelect(placeholder='Buscar usuario a asignar...')
-                            input#user_hidden(type='hidden', name='user')
+                                input#usersSelect(placeholder='Asignar a usuario Jira...')
+                            input#user_hidden(type='hidden', name='jiraUser')
                             unless processSeveral
                                 .text-center(style="margin: 30px;")
                             button.btn.btn-danger.btn-lg(type='submit')
