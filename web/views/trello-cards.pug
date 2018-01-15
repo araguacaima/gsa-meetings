@@ -20,7 +20,9 @@ block scripts
         var worklogCombo = JSON.parse('!{JSON.stringify(worklogCombo)}');
         var priorityCombo = JSON.parse('!{JSON.stringify(priorityCombo)}');
         var whoShowsTrelloInfo = undefined;
-
+        let dateLast;
+        let dateCreated;
+        let timeSpent;
         Array.prototype.pushAll = function (arguments) {
             for (let i = 0; i < arguments.length; i++) {
                 this.push(arguments[i]);
@@ -90,9 +92,7 @@ block scripts
                     var $infoDescriptionHidden = $("#_info_description_hidden");
                     var $infoDescription = $("#_info_description");
                     let valueHidden = $infoDescriptionHidden.val();
-                    let spent = valueHidden.substr(valueHidden.indexOf("h2. *Dedicación:*"));
-                    spent = spent.replace("h2. *Dedicación:*", "").replace(" Horas", "").trim().replace("h", "");
-                    worklog = (worklog / spent).toFixed(2);
+                    worklog = (timeSpent.replace(" Horas", "") / (8 * (8 / worklog))).toFixed(2);
                     worklog = worklog + "h";
                     valueHidden = valueHidden.substr(0, valueHidden.indexOf("h2. *Dedicación:*")) + "h2. *Dedicación:*\n\n" + worklog;
 
@@ -133,7 +133,7 @@ block scripts
                 }
             });
 
-            var cards = $("*[id$='_text']")
+            var cards = $("*[id$='_text']");
             cards.click(function (e) {
                 var cards = $("*[id$='_text']")
                 cards.each(function (index, element) {
@@ -157,6 +157,7 @@ block scripts
                             && !isChildOf(target, "meta"))) {
                         $("#info").hide();
                         $("#meta").hide();
+                        $("#spent").hide();
                         $(target).css("background-color", "#FFFFFF");
                         $(target).css("font-weight", "");
                         whoShowsTrelloInfo = undefined;
@@ -170,44 +171,23 @@ block scripts
                 $("#card").val(info.name);
                 $("#cardId").val(id);
                 var comments = [];
-                let creationDate;
-                let lastActivityDate;
+                let creationDate = new Date(info.dateLastActivity);
+                let lastActivityDate = new Date(info.dateLastActivity);
                 info.actions.forEach(function (action) {
                     if (action.type === "commentCard") {
                         comments.push(" * *" + action.memberCreator.username + " | {color:#707070}_" + action.date.split("T")[0] + "_{color}:* " + action.data.text);
-                        var updateCommentDate = new Date(action.date);
-                        if (lastActivityDate === undefined) {
-                            lastActivityDate = updateCommentDate;
-                        } else {
-                            if (updateCommentDate > lastActivityDate) {
-                                lastActivityDate = updateCommentDate;
-                            }
-                        }
-                    } else if (action.type === "createCard") {
-                        var updateCreationDate = new Date(action.date);
-                        if (creationDate === undefined) {
-                            creationDate = updateCreationDate;
-                        } else {
-                            if (updateCreationDate < creationDate) {
-                                creationDate = updateCreationDate;
-                            }
-                        }
-                    } else if (action.type === "updateCard") {
-                        var updateLastActivityDate = new Date(action.date);
-                        if (lastActivityDate === undefined) {
-                            lastActivityDate = updateLastActivityDate;
-                        } else {
-                            if (updateLastActivityDate > lastActivityDate) {
-                                lastActivityDate = updateLastActivityDate;
-                            }
-                        }
+                    }
+                    var updateCommentDate = new Date(action.date);
+                    if (updateCommentDate < creationDate) {
+                        creationDate = updateCommentDate;
                     }
                 });
-                let dateLast = moment(lastActivityDate);
-                let dateCreated = moment(creationDate);
-                let timeSpent = dateLast.diff(dateCreated, 'hours');
+                dateLast = moment(lastActivityDate);
+                dateCreated = moment(creationDate);
+                timeSpent = dateLast.diff(dateCreated, 'hours');
                 let worklog = 0;
-                var spent = $("#spent").val();
+                var $spent = $("#spent");
+                var spent = $spent.val();
                 if (spent === undefined || spent === "" || spent > 0) {
                     spent = 8;
                 }
@@ -226,7 +206,7 @@ block scripts
                 }
                 $("#spent_hidden").val(worklog + "h");
 
-                $("#created").val(creationDate.toISOString());
+                $("#created").val(dateCreated.toISOString());
                 $("#lastActivity").val(lastActivityDate.toISOString());
                 $("#_info_description").html(
                     (info.desc !== undefined && info.desc !== null ? "h2. <strong>Descripción:</strong><br>" +
@@ -243,7 +223,7 @@ block scripts
                     info.shortUrl + "<br><br>" +
                     "h2. <strong>Creado:</strong><br>" +
                     "<br>" +
-                    creationDate.toISOString() + "<br><br>" +
+                    dateCreated.toISOString() + "<br><br>" +
                     "h2. <strong>Duración:</strong><br>" +
                     "<br>" +
                     timeSpent + "<br><br>" +
@@ -264,7 +244,7 @@ block scripts
                     info.shortUrl + "\n\n" +
                     "h2. *Creado:*\n" +
                     "\n" +
-                    creationDate.toISOString() + "\n\n" +
+                    dateCreated.toISOString() + "\n\n" +
                     "h2. *Duración:*\n" +
                     "\n" +
                     timeSpent + "\n\n" +
@@ -281,6 +261,7 @@ block scripts
                 whoShowsTrelloInfo = id;
                 $("#info").show();
                 $("#meta").show();
+                $spent.show();
                 var parent = currentTarget.parents("section.css-table")[0];
                 $(parent).css("background-color", "#F7F7F7");
                 $(parent).css("width", "100%");
@@ -356,7 +337,7 @@ block content
                             input#priority_hidden(type='hidden', name='priority')
                             div#statusSelect
                             input#status_hidden(type='hidden', name='status')
-                            input#spent(placeholder='Dedicación diaria')
+                            input#spent(style="display: none;", placeholder='Dedicación diaria')
                             input#spent_hidden(type='hidden', name='worklog')
                             div.ui-widget
                                 input#parent(name='parent', placeholder='Issue padre...')

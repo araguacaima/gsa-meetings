@@ -234,18 +234,24 @@ module.exports = function (router, passport) {
         }).then(([data, jiraIssueKey]) => {
             if (data.errors === undefined) {
                 const transition = {fields: {}};
-                if (trelloInfo.jiraUser) {
+                if (trelloInfo.jiraUser && trelloInfo.jiraUser !== null && trelloInfo.jiraUser !== undefined && trelloInfo.jiraUser !== "") {
                     transition.fields.asignee = {name: trelloInfo.jiraUser};
                 }
-                transition.fields.transition = {
-                    id: trelloInfo.transition
-                };
-                return Promise.all([jira.doTransition(req.cookies.jiraUserId, jiraIssueKey, transition), jiraIssueKey]);
+                if (trelloInfo.jiraUser && trelloInfo.jiraUser !== null && trelloInfo.jiraUser !== undefined && trelloInfo.jiraUser !== "") {
+                    transition.fields.transition = {
+                        id: trelloInfo.status
+                    };
+                }
+                if (transition.fields.asignee || transition.fields.transition) {
+                    return Promise.all([jira.doTransition(req.cookies.jiraUserId, jiraIssueKey, transition), jiraIssueKey]);
+                } else {
+                    return Promise.all([null, jiraIssueKey]);
+                }
             } else {
                 throw new Error(data.errors);
             }
-/*        }).then((jiraIssueKey) => {
-            return Promise.all([jira.assignUser(req.cookies.jiraUserId, jiraIssueKey, {name: trelloInfo.jiraUser}), jiraIssueKey]);*/
+            /*        }).then((jiraIssueKey) => {
+                        return Promise.all([jira.assignUser(req.cookies.jiraUserId, jiraIssueKey, {name: trelloInfo.jiraUser}), jiraIssueKey]);*/
         }).then(([data, jiraIssueKey]) => {
             let cardCommentInfoAndCredentials = {};
             cardCommentInfoAndCredentials.cardId = trelloInfo.cardId;
