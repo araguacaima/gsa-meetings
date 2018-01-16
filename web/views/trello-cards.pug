@@ -79,11 +79,36 @@ block scripts
             }).data("ui-autocomplete")._renderItem = function (ul, item) {
                 return $("<li></li>")
                     .data("item.autocomplete", item)
-                    .append("<a class='dd-option'><img class='dd-option-image' src='" + item.imageSrc + "'" + (item.imageWidth !== null ? " width='" + item.imageWidth + "'" : "") + (item.imageHeight !== null ? " height='" + item.imageHeight + "'" : "") + "><label class='dd-option-text'>" + item.label + "</a>")
+                    .append("<a class='dd-option'><img class='dd-option-image' src='" + item.imageSrc + "'" + (item.imageWidth !== null ? " width='" + item.imageWidth + "'" : "") + (item.imageHeight !== null ? " height='" + item.imageHeight + "'" : "") + "><label class='dd-option-text'>" + item.text + "</a>")
                     .appendTo(ul);
             };
 
-            $("#spent").ddslick({
+            var $watchersSelect = $("#watchersSelect");
+
+            $watchersSelect.autocomplete({
+                minLength: 3,
+                source: function (request, response) {
+                    $.get("/jira/users/combo", {q: request.term})
+                        .done(function (data) {
+                            response(data);
+                        });
+                },
+                select: function (event, ui) {
+
+                },
+                open: function (event, ui) {
+                    $(".ui-autocomplete").css("z-index", 1000);
+                }
+            }).on("click", function () {
+                $(this).select();
+            }).data("ui-autocomplete")._renderItem = function (ul, item) {
+                return $("<li></li>")
+                    .data("item.autocomplete", item)
+                    .append("<a class='dd-option'><img class='dd-option-image' src='" + item.imageSrc + "'" + (item.imageWidth !== null ? " width='" + item.imageWidth + "'" : "") + (item.imageHeight !== null ? " height='" + item.imageHeight + "'" : "") + "><label class='dd-option-text'>" + item.text + "</a>")
+                    .appendTo(ul);
+            };
+
+            $("#worklog").ddslick({
                 data: worklogCombo,
                 width: 200,
                 selectText: "Dedicación diaria...",
@@ -93,12 +118,12 @@ block scripts
                     var $infoDescription = $("#_info_description");
                     let valueHidden = $infoDescriptionHidden.val();
                     worklog = (timeSpent.replace(" Horas", "") / (8 * (8 / worklog))).toFixed(2);
-                    worklog = worklog + "h";
-                    valueHidden = valueHidden.substr(0, valueHidden.indexOf("h2. *Dedicación:*")) + "h2. *Dedicación:*\n\n" + worklog;
+                    $("#worklog_hidden").val(worklog);
+                    valueHidden = valueHidden.substr(0, valueHidden.indexOf("h2. *Dedicación:*")) + "h2. *Dedicación:*\n\n" + worklog + "h";
 
                     $infoDescriptionHidden.val(valueHidden);
                     let value = $infoDescription.html();
-                    value = value.substr(0, value.indexOf("h2. <strong>Dedicación:</strong>")) + "h2. <strong>Dedicación:</strong><br><br>" + worklog + "<br>";
+                    value = value.substr(0, value.indexOf("h2. <strong>Dedicación:</strong>")) + "h2. <strong>Dedicación:</strong><br><br>" + worklog + "h" + "<br>";
                     $infoDescription.html(value);
                 }
             });
@@ -157,7 +182,7 @@ block scripts
                             && !isChildOf(target, "meta"))) {
                         $("#info").hide();
                         $("#meta").hide();
-                        $("#spent").hide();
+                        $("#worklog").hide();
                         $(target).css("background-color", "#FFFFFF");
                         $(target).css("font-weight", "");
                         whoShowsTrelloInfo = undefined;
@@ -185,26 +210,31 @@ block scripts
                 dateLast = moment(lastActivityDate);
                 dateCreated = moment(creationDate);
                 timeSpent = dateLast.diff(dateCreated, 'hours');
-                let worklog = 0;
-                var $spent = $("#spent");
-                var spent = $spent.val();
-                if (spent === undefined || spent === "" || spent > 0) {
-                    spent = 8;
+
+                var $worklog = $("#worklog");
+                let worklog = $worklog.val();
+                if (worklog === undefined || worklog === "") {
+                    worklog = 8;
+                } else {
+                    worklog = worklog / 1;
+                    if (worklog > 0) {
+                        worklog = 8;
+                    }
                 }
                 if (timeSpent === 0) {
                     timeSpent = dateLast.diff(dateCreated, 'minutes');
                     if (timeSpent === 0) {
                         timeSpent = "1 Minuto";
-                        worklog = "1 Minuto";
+                        worklog = 0.0166666666666667;
                     } else {
-                        worklog = (timeSpent * 8 * spent).toFixed(2) + " Minutos";
+                        worklog = (timeSpent * 8 * worklog).toFixed(2) / 60;
                         timeSpent = timeSpent + " Minutos";
                     }
                 } else {
-                    worklog = (timeSpent / spent).toFixed(2) + " Horas";
+                    worklog = (timeSpent / worklog).toFixed(2);
                     timeSpent = timeSpent + " Horas";
                 }
-                $("#spent_hidden").val(worklog + "h");
+                $("#worklog_hidden").val(worklog);
 
                 $("#created").val(dateCreated.toISOString());
                 $("#lastActivity").val(lastActivityDate.toISOString());
@@ -229,7 +259,7 @@ block scripts
                     timeSpent + "<br><br>" +
                     "h2. <strong>Dedicación:</strong><br>" +
                     "<br>" +
-                    worklog + "<br>");
+                    worklog + "h" + "<br>");
                 $("#_info_description_hidden").val((info.desc !== undefined && info.desc !== null ? "h2. *Descripción:*\n" +
                     "\n" +
                     info.desc + "\n\n" : "") +
@@ -250,7 +280,7 @@ block scripts
                     timeSpent + "\n\n" +
                     "h2. *Dedicación:*\n" +
                     "\n" +
-                    worklog);
+                    worklog + "h");
                 var labels = info.labels;
                 var labels_ = [];
                 labels.forEach(function (element) {
@@ -261,7 +291,7 @@ block scripts
                 whoShowsTrelloInfo = id;
                 $("#info").show();
                 $("#meta").show();
-                $spent.show();
+                $worklog.show();
                 var parent = currentTarget.parents("section.css-table")[0];
                 $(parent).css("background-color", "#F7F7F7");
                 $(parent).css("width", "100%");
@@ -337,13 +367,14 @@ block content
                             input#priority_hidden(type='hidden', name='priority')
                             div#statusSelect
                             input#status_hidden(type='hidden', name='status')
-                            input#spent(style="display: none;", placeholder='Dedicación diaria')
-                            input#spent_hidden(type='hidden', name='worklog')
+                            input#worklog(style="display: none;", placeholder='Dedicación diaria')
+                            input#worklog_hidden(type='hidden', name='worklog')
+                            div.ui-widget
+                                input#watchersSelect(placeholder='Añadir watcher a issue...', name='watchers')
                             div.ui-widget
                                 input#parent(name='parent', placeholder='Issue padre...')
                             div.ui-widget
-                                input#usersSelect(placeholder='Asignar a usuario Jira...')
-                            input#user_hidden(type='hidden', name='jiraUser')
+                                input#usersSelect(placeholder='Asignar a usuario Jira...', name='assignTo')
                             unless processSeveral
                                 .text-center(style="margin: 30px;")
                             button.btn.btn-danger.btn-lg(type='submit')

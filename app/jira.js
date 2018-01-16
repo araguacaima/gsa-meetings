@@ -1,7 +1,10 @@
 const jiraTools = require('../app/jiraTools');
 const auth = require('../config/auth').jiraAuth;
+const commons = require('../app/commons');
 const issuesGetAPIUri = "/rest/api/2/issue/${id}";
 const issueCreateAPIUri = "/rest/api/2/issue";
+const addWorklogAPIUri = "/rest/api/2/issue/${issueIdOrKey}/worklog";
+const addWatchersAPIUri = "/rest/api/2/issue/${issueIdOrKey}/watchers";
 const issuesSearchAPIUri = "/rest/api/2/search";
 const usersSearchAPIUri = "/rest/api/2/user/picker";
 const createmetaAPIUri = "/rest/api/2/issue/createmeta";
@@ -37,6 +40,69 @@ module.exports.createIssue = function (jiraUserId, issue) {
             }
         };
         return jiraTools.invoke(credentials.token, methodPost, url, args);
+    }).then((data) => {
+        return data;
+    });
+};
+
+module.exports.addWatchers = function (jiraUserId, issueKey, watchersNames) {
+    return new Promise(function (resolve, reject) {
+        jiraTools.getCredentials(jiraUserId)
+            .then((credentials) => resolve(credentials))
+            .catch(reject);
+    }).then(function (credentials) {
+        const url = auth.base_url + addWatchersAPIUri;
+        const promises = [];
+        const watchersNamesTokens = watchersNames.split(",");
+        watchersNamesTokens.forEach(function (watcherName) {
+            const worklog = {
+                name: watcherName
+            };
+            let args = {
+                data: worklog,
+                path: {issueIdOrKey: issueKey},
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                }
+            };
+            promises.push(jiraTools.invoke(credentials.token, methodPost, url, args));
+        });
+        return Promise.all(promises);
+    }).then((data) => {
+        return data;
+    });
+};
+
+module.exports.addWorklog = function (jiraUserId, issueKey, timeSpentSeconds) {
+    return new Promise(function (resolve, reject) {
+        jiraTools.getCredentials(jiraUserId)
+            .then((credentials) => resolve(credentials))
+            .catch(reject);
+    }).then(function (credentials) {
+
+        try {
+            timeSpentSeconds = timeSpentSeconds / 1
+        } catch (ex) {
+        }
+
+        if (!commons.isNumber(timeSpentSeconds)) {
+            return "";
+        } else {
+            const url = auth.base_url + addWorklogAPIUri;
+            const worklog = {
+                "timeSpentSeconds": timeSpentSeconds
+            };
+            let args = {
+                data: worklog,
+                path: {issueIdOrKey: issueKey},
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                }
+            };
+            return jiraTools.invoke(credentials.token, methodPost, url, args);
+        }
     }).then((data) => {
         return data;
     });
@@ -199,8 +265,8 @@ module.exports.createUsersCombo = function (users) {
     const result = [];
     users.forEach(function (user) {
         result.push({
-            text: user.key,
-            value: user.displayName + " (" + user.name + ")",
+            text: user.displayName + " (" + user.name + ")",
+            value: user.key,
             selected: false,
             description: user.html,
             imageSrc: user.avatarUrl,

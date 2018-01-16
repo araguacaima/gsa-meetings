@@ -227,16 +227,20 @@ module.exports = function (router, passport) {
         let trelloInfo = req.body;
         const issue = trello.toJira(trelloInfo);
         const prevUri = req.headers.referer;
-        jira.createIssue(req.cookies.jiraUserId, issue).then((data) => {
-            return Promise.all([jira.getMyself(req.cookies.jiraUserId), data]);
+        jira.createIssue(req.cookies.jiraUserId, issue).then((jiraIssue) => {
+            return Promise.all([jira.getMyself(req.cookies.jiraUserId), jiraIssue]);
         }).then(([myself, jiraIssue]) => {
-            return Promise.all([jira.assignUser(req.cookies.jiraUserId, jiraIssue.key, {name: myself.name}), jiraIssue.key]);
+            return Promise.all([jira.assignUser(req.cookies.jiraUserId, jiraIssue.key, {name: myself.name}), jiraIssue]);
+        }).then(([myself, jiraIssue]) => {
+            return Promise.all([jira.addWatchers(req.cookies.jiraUserId, jiraIssue.key, trelloInfo.watchers), jiraIssue]);
+        }).then(([myself, jiraIssue]) => {
+            return Promise.all([jira.addWorklog(req.cookies.jiraUserId, jiraIssue.key, trelloInfo.worklog), jiraIssue]);
         }).then(([data, jiraIssue]) => {
             const jiraIssueKey = jiraIssue.key;
-            if (data.errors === undefined) {
+            if (data.errors === undefined && data.errorMessages === undefined) {
                 const transition = {fields: {}};
-                if (trelloInfo.jiraUser && trelloInfo.jiraUser !== null && trelloInfo.jiraUser !== undefined && trelloInfo.jiraUser !== "") {
-                    transition.fields.asignee = {name: trelloInfo.jiraUser};
+                if (trelloInfo.assignTo && trelloInfo.assignTo !== null && trelloInfo.assignTo !== undefined && trelloInfo.assignTo !== "") {
+                    transition.fields.asignee = {name: trelloInfo.assignTo};
                 }
                 if (trelloInfo.status && trelloInfo.status !== null && trelloInfo.status !== undefined && trelloInfo.status !== "") {
                     transition.fields.transition = {

@@ -26,10 +26,14 @@ Array.prototype.concatIfNotExist = function (array, comparer) {
     });
 };
 
-module.exports.escapeJson = function(key, value) {
+module.exports.escapeJson = function (key, value) {
     // Filtrando propiedades
     if (typeof value === "string") {
         return value.replace(/"/g, "\\\"");
     }
     return value;
+};
+
+module.exports.isNumber = function (n) {
+    return !isNaN(parseFloat(n)) && isFinite(n);
 };

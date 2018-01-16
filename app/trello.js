@@ -261,20 +261,6 @@ module.exports.getCardsOnList = function (listInfoAndCredentials, res) {
 };
 
 module.exports.toJira = function (trelloInfo) {
-    const created = trelloInfo.created;
-    const lastActivity = trelloInfo.lastActivity;
-    let dateLast = moment(lastActivity);
-    let dateCreated = moment(created);
-    let timeSpent = dateLast.diff(dateCreated, 'hours');
-    if (timeSpent === 0) {
-        timeSpent = dateLast.diff(dateCreated, 'minutes');
-        if (timeSpent === 0) {
-            timeSpent = "1m";
-        } else {
-            timeSpent = timeSpent + "m";
-        }
-    }
-    trelloInfo.description = trelloInfo.description.substr(0,trelloInfo.description.indexOf("h2. *Duración:*")) + "h2. *Duración:*\n\n" + timeSpent;
     let labels = trelloInfo.labels.split(",").map((label) => {
         return label.replace("---", "/").replace("--", "/").replace("-", "/").replace("Consultas/Otros", "Consultas");
     });
@@ -282,16 +268,6 @@ module.exports.toJira = function (trelloInfo) {
         labels.push("Delegated");
     }
     return {
-        /*        update: {
-                    worklog: [
-                        {
-                            add: {
-                                timeSpent: timeSpent,
-                                started: dateCreated.format(settings.dateFormatRFC3339)
-                            }
-                        }
-                    ]
-                },*/
         fields: {
             project: {
                 id: trelloInfo.project_id
@@ -300,17 +276,11 @@ module.exports.toJira = function (trelloInfo) {
             issuetype: {
                 id: trelloInfo.issue_type
             },
-            /*            reporter: {
-                            name: trelloInfo.user
-                        },*/
             priority: {
                 id: trelloInfo.priority
             },
             labels: labels,
-            description: trelloInfo.description,
-            /*            "assignee": {
-                            "name": "homer"
-                        }*/
+            description: trelloInfo.description
         }
     };
 };
