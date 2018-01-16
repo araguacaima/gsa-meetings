@@ -239,21 +239,24 @@ module.exports = function (router, passport) {
             const jiraIssueKey = jiraIssue.key;
             if (data.errors === undefined && data.errorMessages === undefined) {
                 const transition = {fields: {}};
-                if (trelloInfo.assignTo && trelloInfo.assignTo !== null && trelloInfo.assignTo !== undefined && trelloInfo.assignTo !== "") {
-                    transition.fields.asignee = {name: trelloInfo.assignTo};
-                }
                 if (trelloInfo.status && trelloInfo.status !== null && trelloInfo.status !== undefined && trelloInfo.status !== "") {
                     transition.transition = {
                         id: trelloInfo.status
                     };
                 }
-                if (transition.fields.asignee || transition.transition) {
+                if (transition.transition) {
                     return Promise.all([jira.doTransition(req.cookies.jiraUserId, jiraIssueKey, transition), jiraIssue]);
                 } else {
                     return Promise.all([null, jiraIssue]);
                 }
             } else {
                 throw new Error(data.errors);
+            }
+        }).then(([data, jiraIssue]) => {
+            if (trelloInfo.assignTo && trelloInfo.assignTo !== null && trelloInfo.assignTo !== undefined && trelloInfo.assignTo !== "") {
+                return Promise.all([jira.assignUser(req.cookies.jiraUserId, jiraIssue.key, {name: trelloInfo.assignTo}), jiraIssue]);
+            } else {
+                return Promise.all([null, jiraIssue]);
             }
         }).then(([data, jiraIssue]) => {
             if (data.errors === undefined) {
