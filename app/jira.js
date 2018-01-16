@@ -55,11 +55,8 @@ module.exports.addWatchers = function (jiraUserId, issueKey, watchersNames) {
         const promises = [];
         const watchersNamesTokens = watchersNames.split(",");
         watchersNamesTokens.forEach(function (watcherName) {
-            const worklog = {
-                name: watcherName
-            };
             let args = {
-                data: worklog,
+                data: "\"" + watcherName + "\"",
                 path: {issueIdOrKey: issueKey},
                 headers: {
                     "Content-Type": "application/json",
