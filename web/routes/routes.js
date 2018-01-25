@@ -259,7 +259,7 @@ module.exports = function (router, passport) {
                 return Promise.all([null, jiraIssue]);
             }
         }).then(([data, jiraIssue]) => {
-            if (data.errors === undefined) {
+            if (data === undefined || data.errors === undefined) {
                 let cardStickerInfoAndCredentials = {};
                 cardStickerInfoAndCredentials.stickerId = settings.trello.migratedSticker.id;
                 cardStickerInfoAndCredentials.cardId = trelloInfo.cardId;
