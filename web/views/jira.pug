@@ -1,0 +1,49 @@
+extends layout
+
+block title
+    title= title
+block scripts
+    script(type='text/javascript', src='/javascripts/jquery-3.2.1.js')
+    script(type='text/javascript', src='/javascripts/jquery-outside-events-plugin.js')
+    script(type='text/javascript', src='/javascripts/jquery.ddslick.js')
+    script(type='text/javascript', src='/javascripts/jquery-ui.js')
+    script(type='text/javascript', src='/javascripts/jquery.json-view.min.js')
+    link(rel='stylesheet', type='text/css', href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
+    link(rel='stylesheet', type='text/css', href='/stylesheets/jquery-ui.css')
+    link(rel='stylesheet', type='text/css', href='/stylesheets/jquery.json-view.min.css')
+
+    script.
+        $(function () {
+            $("#search").click(function (e) {
+                const q = $("#jql").val();
+                $.get("/jira/tickets", {q: q, full: $("#full")[0].checked})
+                    .done(function (data) {
+                        let result = $("#result");
+                        result.empty();
+                        result.jsonView(JSON.stringify(data), {collapsed: true});
+                    });
+            })
+        });
+
+
+block content
+    h1 Put your JQL for search.
+    br
+    .container
+        section.css-table
+            section.two-column
+                section.cell
+                    .ui-widget
+                        span Full?
+                        | &nbsp;
+                        input#full(name='full', type='checkbox', checked=true)
+                    br
+                    .ui-widget
+                        input#jql(name='q', placeholder='JQL...')
+                    br
+                    button#search.btn.btn-danger.btn-lg(type='button')
+                        span.icon-size-small.icon-jira-alt
+                        | &nbsp;Search in Jira
+                section.cell
+                    #result(rows="20", cols="80")
+    br

@@ -38,7 +38,7 @@ block scripts
             $("#parent").autocomplete({
                 minLength: 3,
                 source: function (request, response) {
-                    $.get("/jira/tickets", {q: request.term})
+                    $.get("/jira/tickets", {q: "text ~ '" + request.term.trim() + "'" })
                         .done(function (data) {
                             let issues = [{id: "-1", value: "Select one..."}];
                             issues.pushAll(data.map(function (issue) {

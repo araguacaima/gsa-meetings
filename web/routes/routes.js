@@ -282,7 +282,7 @@ module.exports = function (router, passport) {
     });
 
     router.get('/jira/tickets', ensureAuthenticated, function (req, res) {
-        jira.issueSearch(req.cookies.jiraUserId, req.query.q)
+        jira.issueSearch(req.cookies.jiraUserId, req.query.q, req.query.full)
             .then((issues) => res.send(issues))
             .catch((err) => {
                 console.log(err);
@@ -313,6 +313,13 @@ module.exports = function (router, passport) {
         function (req, res) {
             res.render('login-jira', {
                 title: 'GSA | Jira Authentication'
+            })
+        });
+
+    router.get('/jira',
+        function (req, res) {
+            res.render('jira', {
+                title: 'GSA | Jira Searcher'
             })
         });
 

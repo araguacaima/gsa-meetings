@@ -34,6 +34,10 @@
 	font-size: 20px;
 }
 
+.icon-size-medium {
+	font-size: 30px;
+}
+
 /* Icons */ 
 .icon-aftereffects:before {
 	content:"\f101";

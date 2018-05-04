@@ -14,6 +14,7 @@ const myselfAPIUri = "/rest/api/2/myself";
 const methodGet = "GET";
 const methodPost = "POST";
 const methodPut = "PUT";
+const cleaner = require('groom');
 const createmetaParams = {
     parameters: {
         expand: "projects.issuetypes.fields",
@@ -128,17 +129,16 @@ module.exports.getIssue = function (jiraUserId, issueKey) {
 };
 
 
-module.exports.issueSearch = function (jiraUserId, text) {
-    let textTrimed = text.trim();
+module.exports.issueSearch = function (jiraUserId, jql, full) {
+    let jqlTrimed = jql.trim();
     return new Promise(function (resolve, reject) {
         jiraTools.getCredentials(jiraUserId)
             .then((credentials) => resolve(credentials))
             .catch(reject);
     }).then(function (credentials) {
         const url = auth.base_url + issuesSearchAPIUri;
-        let jql = "text ~ '" + textTrimed + "'";
         let args = {
-            parameters: {"jql": jql},
+            parameters: {"jql": jqlTrimed},
             headers: {
                 "Accept": "application/json"
             }
@@ -147,7 +147,7 @@ module.exports.issueSearch = function (jiraUserId, text) {
     }).then(([data, credentials]) => {
         if (data.issues.length === 0) {
             const url = auth.base_url + issuesSearchAPIUri;
-            let jql = "id = '" + textTrimed + "'";
+            let jql = "id = '" + jqlTrimed + "'";
             let args = {
                 parameters: {"jql": jql},
                 headers: {
@@ -159,11 +159,20 @@ module.exports.issueSearch = function (jiraUserId, text) {
             return data;
         }
     }).then((data) => {
-        return data.issues.map(function (issue) {
-            return {
-                key: issue.key, summary: issue.fields.summary
-            };
-        });
+        if (data) {
+            const cleanedData = cleaner(data);
+            if (full) {
+                return cleanedData.issues;
+            } else {
+                return cleanedData.issues.map(function (issue) {
+                    return {
+                        key: issue.key, summary: issue.fields.summary
+                    };
+                });
+            }
+        } else {
+            return {};
+        }
     });
 };
 
