@@ -319,7 +319,7 @@ module.exports = function (router, passport) {
     router.get('/jira',
         function (req, res) {
             res.render('jira', {
-                title: 'GSA | Jira Searcher'
+                title: 'GSA | Jira Quality'
             })
         });
 

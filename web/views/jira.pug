@@ -8,6 +8,7 @@ block scripts
     script(type='text/javascript', src='/javascripts/jquery.ddslick.js')
     script(type='text/javascript', src='/javascripts/jquery-ui.js')
     script(type='text/javascript', src='/javascripts/jquery.json-view.min.js')
+    script(type='text/javascript', src='/javascripts/jiraQARules.js')
     link(rel='stylesheet', type='text/css', href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
     link(rel='stylesheet', type='text/css', href='/stylesheets/jquery-ui.css')
     link(rel='stylesheet', type='text/css', href='/stylesheets/jquery.json-view.min.css')
@@ -16,27 +17,20 @@ block scripts
         $(function () {
             $("#search").click(function (e) {
                 const q = $("#jql").val();
-                $.get("/jira/tickets", {q: q, full: $("#full")[0].checked})
-                    .done(function (data) {
-                        let result = $("#result");
-                        result.empty();
-                        result.jsonView(JSON.stringify(data), {collapsed: true});
-                    });
+                jiraQARules(q);
             })
         });
 
 
 block content
-    h1 Put your JQL for search.
+    h1 Put your JQL for verifying issues quality.
     br
     .container
         section.css-table
-            section.two-column
+            section.three-column
                 section.cell
                     .ui-widget
-                        span Full?
-                        | &nbsp;
-                        input#full(name='full', type='checkbox', checked=true)
+                        input#full(name='full', type='hidden', value=true)
                     br
                     .ui-widget
                         input#jql(name='q', placeholder='JQL...')
@@ -45,5 +39,7 @@ block content
                         span.icon-size-small.icon-jira-alt
                         | &nbsp;Search in Jira
                 section.cell
-                    #result(rows="20", cols="80")
+                    #result
+                section.cell
+                    #validation
     br
